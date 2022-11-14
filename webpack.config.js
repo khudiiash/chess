@@ -21,6 +21,9 @@ module.exports = {
     ]
   },
   resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
     extensions: ['.ts', '.js'],
     fallback: {
       "buffer": false
