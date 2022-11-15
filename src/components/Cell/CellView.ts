@@ -30,6 +30,11 @@ class CellView implements IView {
     // @ts-ignore
     this.mesh.material.color.set(0x99ee99);
   }
+
+  dehighlight() {
+    // @ts-ignore
+    this.mesh.material.color.set(this.color);
+  }
 }
 
 export default CellView;

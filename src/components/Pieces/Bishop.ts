@@ -1,7 +1,17 @@
 import { TMovesMap } from "@/types";
-import { TPosition } from "@/types/TPosition";
-import { clampToBoard, outOfBoard } from "@/utils/math";
-import { BasePiece, BasePieceModel, BasePieceView } from "./BasePiece";
+import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+
+class Bishop extends BasePiece {
+
+  constructor(value: number) {  
+    super(value);
+    this.model = new BishopModel(value);
+    this.view = new BishopView();
+    this.view.build({ size: this.model.size, color: this.model.color });
+    this.makeClickable();
+  }
+
+}
 
 class BishopModel extends BasePieceModel {
 
@@ -10,6 +20,13 @@ class BishopModel extends BasePieceModel {
     this.type = "bishop";
     this.size = { width: 0.5, height: 1, depth: 0.5 };
   }
+
+  get moves(): TMovesMap {
+    return  [ [8, -8],  [0, 0],  [8, 8],
+              [0, 0],            [0, 0],
+              [-8, -8], [0, 0], [-8, 8]];
+  }
+
 }
 
 class BishopView extends BasePieceView {
@@ -18,24 +35,6 @@ class BishopView extends BasePieceView {
       super();
     }
   
-}
-
-class Bishop extends BasePiece {
-
-  constructor(value: number) {  
-    super();
-    this.model = new BishopModel(value);
-    this.view = new BishopView();
-    this.view.build({ size: this.model.size, color: this.model.color });
-    this.makeClickable();
-  }
-
-  get moves(): TMovesMap {
-    return  [ [8, -8],  [0, 0],  [8, 8],
-              [0, 0],            [0, 0],
-              [-8, -8], [0, 0], [-8, 8]];
-  }
-
 }
 
 

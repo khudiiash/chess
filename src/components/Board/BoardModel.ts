@@ -1,7 +1,7 @@
 import { TBoardMap, TPiece } from "@/types";
 import { TPosition } from "@/types/TPosition";
 import { Cell } from "../Cell";
-import PieceFactory from "../Pieces/PieceFactory";
+import PieceFactory from "@/components/Base/PieceFactory";
 
 class BoardModel {
   

@@ -1,4 +1,4 @@
-import { King, Queen, Bishop, Knight, Rook, Pawn } from ".";
+import { King, Queen, Bishop, Knight, Rook, Pawn } from "../../Pieces";
 
 interface PieceTypes {
     [key: string]: typeof King | typeof Queen | typeof Bishop | typeof Knight | typeof Rook | typeof Pawn;

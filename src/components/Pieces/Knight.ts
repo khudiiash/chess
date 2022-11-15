@@ -1,6 +1,17 @@
 import { TMovesMap } from "@/types";
-import { TPosition } from "@/types/TPosition";
-import { BasePiece, BasePieceModel, BasePieceView } from "./BasePiece";
+import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+
+class Knight extends BasePiece {
+
+  constructor(value: number) {
+    super(value);
+    this.model = new KnightModel(value);
+    this.view = new KnightView();
+    this.view.build({ size: this.model.size, color: this.model.color });
+    this.makeClickable();
+  }
+  
+}
 
 class KnightModel extends BasePieceModel {
 
@@ -9,6 +20,12 @@ class KnightModel extends BasePieceModel {
     this.type = "bishop";
     this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
+
+  get moves(): TMovesMap {
+    return [[1, -2], [2, -1], [2, 1],  [1, 2],
+            [-1, 2], [-2, 1], [-2, -1],[-1, -2]];
+  }
+
 }
 
 class KnightView extends BasePieceView {
@@ -19,22 +36,6 @@ class KnightView extends BasePieceView {
   
 }
 
-class Knight extends BasePiece {
-
-  constructor(value: number) {
-    super();
-    this.model = new KnightModel(value);
-    this.view = new KnightView();
-    this.view.build({ size: this.model.size, color: this.model.color });
-    this.makeClickable();
-  }
-
-  get moves(): TMovesMap {
-    return [[1, -2], [2, -1], [2, 1],  [1, 2],
-            [-1, 2], [-2, 1], [-2, -1],[-1, -2]];
-  }
-  
-}
 
 
 

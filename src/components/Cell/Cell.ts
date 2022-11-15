@@ -40,6 +40,11 @@ class Cell extends InteractiveComponent {
       this.view.highlight();
     }
 
+    dehighlight() {
+      this.model.setHighlighted(false);
+      this.view.dehighlight();
+    }
+
     onClick(): void {
       this.select();
     }

@@ -13,7 +13,7 @@ class CellModel implements IModel {
   color: number;
   
   constructor(row: number, col: number) {
-    this.name =  `${String.fromCharCode(97 + col - 1)}${row}`;
+    this.name =  `${String.fromCharCode(97 + col)}${row + 1}`;
     this.color = (row + col) % 2 === 0 ? 0x333333 : 0xeeeeee;
 
     this.state = {

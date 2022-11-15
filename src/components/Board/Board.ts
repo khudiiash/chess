@@ -40,17 +40,17 @@ class Board implements IComponent {
     onCellClick(cell: Cell) {
         // TODO: implement
         const piece = this.model.getSelectedPiece();
+
         if (piece && cell.isHighlighted) {
             this.model.makeMove({ from: piece.position, to: cell.position });
             this.model.state.selection.piece.move(cell.row, cell.col);
             this.model.clearSelection();
-        } else {
-            this.model.setSelectedCell(cell);
         }
     }
 
     highlightPossibleMoves(piece: TPiece) {
        const moves = this.getValidPositions(piece.getPossibleMoves());
+       this.cells.forEach(row => row.forEach(cell => cell.dehighlight()));
        moves.forEach((position: TPosition) => {
         const cell = this.cells[position.row][position.col];
         cell.highlight();
@@ -59,7 +59,6 @@ class Board implements IComponent {
 
     getValidPositions(positions: TPosition[] | TPosition[][]): TPosition[] {
         const moves = [];
-        console.log({ positions });
         for (const position of positions) {
             if (Array.isArray(position)) {
                 for (const pos of position) {
@@ -75,7 +74,6 @@ class Board implements IComponent {
             }
         }
 
-        console.log(moves);
         return moves;
     }
 

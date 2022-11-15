@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { IView } from '@/interfaces';
 import { TPiece } from '@/types';
-import PieceFactory from '../Pieces/PieceFactory';
+import PieceFactory from '@/components/Base/PieceFactory';
 
 import { Cell } from '@/components'
 
