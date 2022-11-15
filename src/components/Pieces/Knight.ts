@@ -7,7 +7,7 @@ class Knight extends BasePiece {
     super(value);
     this.model = new KnightModel(value);
     this.view = new KnightView();
-    this.view.build({ size: this.model.size, color: this.model.color });
+    this.view.build({ size: this.model.size, color: this.model.color, team: this.model.team  });
     this.makeClickable();
   }
   
@@ -17,7 +17,7 @@ class KnightModel extends BasePieceModel {
 
   constructor(value: number) {
     super(value);
-    this.type = "bishop";
+    this.type = 'knight';
     this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
 

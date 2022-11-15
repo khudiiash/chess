@@ -64,7 +64,6 @@ export class Scene {
     if (intersects.length > 0) {
       const object = intersects.find((item) => item.object.userData.clickable)?.object;
       if (object) {
-        this.traverse(child => child.userData.clickable && child.userData.component.deselect());
         object.userData.component.dispatchEvent('click', object.userData.component);
       }
     }

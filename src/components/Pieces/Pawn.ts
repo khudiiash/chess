@@ -7,7 +7,7 @@ class Pawn extends BasePiece {
     super(value);
     this.model = new PawnModel(value);
     this.view = new PawnView();
-    this.view.build({ size: this.model.size, color: this.model.color });
+    this.view.build({ size: this.model.size, color: this.model.color,  team: this.model.team  });
     this.makeClickable();
   }
 
@@ -18,7 +18,7 @@ class PawnModel extends BasePieceModel {
 
   constructor(value: number) {
     super(value);
-    this.type = "bishop";
+    this.type = 'pawn';
     this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
 

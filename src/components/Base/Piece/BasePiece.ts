@@ -26,12 +26,12 @@ class BasePiece extends InteractiveComponent {
       this.view.setPosition(row, col);
     }
 
-    move(row: number = this.row, col: number = this.col) {
+    move(move: TPosition) {
       if (!this.model.originalPosition) {
-        this.model.setOriginalPosition(row, col);
+        this.model.setOriginalPosition(move.row, move.col);
       }
-      this.model.setPosition(row, col);
-      this.view.move(row, col);
+      this.model.setPosition(move.row, move.col);
+      return this.view.move(move.row, move.col);
     }
 
     select() {
@@ -44,8 +44,13 @@ class BasePiece extends InteractiveComponent {
       this.view.deselect();
     }
 
+    kill() {
+      this.model.kill();
+      this.view.kill();
+    }
+
     onClick(): void {
-      this.select();
+
     }
 
     getPossibleMoves(): TPosition[] | TPosition[][] {
@@ -60,7 +65,7 @@ class BasePiece extends InteractiveComponent {
         let r = 0;
         let c = 0;
         
-        if (Math.abs(move[0]) < 8 && Math.abs(move[1]) < 8) {
+        if (['knight', 'pawn', 'king'].includes(this.model.type) && !(this.isPawn && !this.hasMoved)) {
           r = row + move[0];
           c = col + move[1];
           return outOfBoard(r, c) ? [] : [{row: r, col: c}]
@@ -89,6 +94,35 @@ class BasePiece extends InteractiveComponent {
     get col() {
       return this.model.state.position.col;
     }
+
+    get isKing() {
+      return this.model.type === 'king';
+    }
+    get isQueen() {
+      return this.model.type === 'queen';
+    }
+    get isRook() {
+      return this.model.type === 'rook';
+    }
+    get isBishop() {
+      return this.model.type === 'bishop';
+    }
+    get isKnight() {
+      return this.model.type === 'knight';
+    }
+    get isPawn() {
+      return this.model.type === 'pawn';
+    }
+    get isWhite() {
+      return this.model.team === 'white';
+    }
+    get isBlack() {
+      return this.model.team === 'black';
+    }
+    get hasMoved() {
+      return this.model.hasMoved();
+    }
+
 
 }
 

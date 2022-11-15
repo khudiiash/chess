@@ -9,7 +9,7 @@ class BoardModel {
   coords: number[][];
   pieceFactory: PieceFactory;
   history: number[][][] = [];
-  state: { map: any; selection: { piece: any; cell: any; }; };
+  state: { map: any; turn: string, selection: { piece: any; cell: any; }; };
   
   constructor() {
     this.pieceFactory = new PieceFactory();
@@ -17,6 +17,7 @@ class BoardModel {
 
     this.state = {
       map: this.startMap,
+      turn: 'white',
       selection: { piece: null, cell: null } 
     }
   }
@@ -35,11 +36,18 @@ class BoardModel {
     const moves = piece.getPossibleMoves();
     return moves;
   }
+
   getSelectedCell() {
     return this.state.selection.cell;
   }
+
   getSelectedPiece() {
     return this.state.selection.piece;
+  }
+
+  nextTurn() {
+    this.history.push(this.state.map);
+    this.state.turn = this.state.turn === 'white' ? 'black' : 'white';
   }
 
   makeMove(move: { from: TPosition; to: TPosition; }) {
@@ -47,11 +55,21 @@ class BoardModel {
     const piece = this.state.map[from.row][from.col];
     this.state.map[from.row][from.col] = 0;
     this.state.map[to.row][to.col] = piece;
+    this.nextTurn();
   }
 
   clearSelection() {
+    this.state.selection.piece.deselect();
     this.state.selection.piece = null;
     this.state.selection.cell = null;
+  }
+
+  get isWhiteTurn() {
+    return this.state.turn === 'white';
+  }
+
+  get isBlackTurn() {
+    return this.state.turn === 'black';
   }
 
   get startMap(): TBoardMap {

@@ -17,8 +17,8 @@ class BoardView implements IView {
     
     build({ cellComponents } : {cellComponents: Cell[][]}) : void {
         this.cells = [];
-        const geometry = new THREE.BoxGeometry( 8, 1, 8 );
-        const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+        const geometry = new THREE.BoxGeometry( 8, 0.1, 8 );
+        const material = new THREE.MeshStandardMaterial( { color: 0xff9900 } );
         const board = new THREE.Mesh( geometry, material );
         // board.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
         this.cellsContainer = new THREE.Object3D();
@@ -38,8 +38,8 @@ class BoardView implements IView {
             this.cellsContainer.add(cell.view.mesh);
         }
 
-        this.cellsContainer.position.set(-3.5, 0.5, -3.5);
-        this.piecesContainer.position.set(-3.5, 0.5, -3.5);
+        this.cellsContainer.position.set(-3.5, 0.01, -3.5);
+        this.piecesContainer.position.set(-3.5, 0.01, -3.5);
         board.add(this.cellsContainer);
         board.add(this.piecesContainer);
         this.mesh = board;
@@ -56,6 +56,12 @@ class BoardView implements IView {
                 this.piecesContainer.add(piece.view.mesh);
             })
        })
+    }
+
+    killPiece(piece: TPiece) {
+        const index = this.pieces.indexOf(piece.view.mesh);
+        this.pieces.splice(index, 1);
+        this.piecesContainer.remove(piece.view.mesh);
     }
 
 }

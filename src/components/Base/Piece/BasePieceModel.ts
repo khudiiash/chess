@@ -13,6 +13,7 @@ class BasePieceModel {
   state: {
     isSelected: boolean;
     isHovered: boolean;
+    isAlive: boolean;
     position: {
       row: number;
       col: number;
@@ -29,6 +30,7 @@ class BasePieceModel {
     this.state = {
       isSelected: false,
       isHovered: false,
+      isAlive: true,
       position: {
         row: 0,
         col: 0
@@ -52,6 +54,14 @@ class BasePieceModel {
 
   setHovered(isHovered: boolean) {
     this.state.isHovered = isHovered;
+  }
+
+  hasMoved(): boolean {
+    return !!this.originalPosition;
+  }
+
+  kill() {
+    this.state.isAlive = false;
   }
 
   get moves(): TMovesMap {

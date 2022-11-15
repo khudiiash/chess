@@ -9,7 +9,7 @@ class CellView implements IView {
   build(config: any) {
     this.color = config.color;
     this.mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.99, 0.1, 0.99),
+      new THREE.BoxGeometry(0.95, 0.1, 0.95),
       new THREE.MeshStandardMaterial({ color: config.color })
     );
 

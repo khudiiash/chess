@@ -7,7 +7,7 @@ class Bishop extends BasePiece {
     super(value);
     this.model = new BishopModel(value);
     this.view = new BishopView();
-    this.view.build({ size: this.model.size, color: this.model.color });
+    this.view.build({ size: this.model.size, color: this.model.color, team: this.model.team });
     this.makeClickable();
   }
 
@@ -17,7 +17,7 @@ class BishopModel extends BasePieceModel {
 
   constructor(value: number) {
     super(value);
-    this.type = "bishop";
+    this.type = 'bishop';
     this.size = { width: 0.5, height: 1, depth: 0.5 };
   }
 

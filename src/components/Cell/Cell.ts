@@ -26,13 +26,11 @@ class Cell extends InteractiveComponent {
     }
 
     select() {
-      this.model.setSelected(true);
-      this.view.select();
+      
     }
 
     deselect() {
-      this.model.setSelected(false);
-      this.view.deselect();
+      
     }
 
     highlight() {

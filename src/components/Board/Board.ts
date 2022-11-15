@@ -1,7 +1,7 @@
 import { IComponent } from "@/interfaces";
 import { TPiece } from "@/types";
 import { TPosition } from "@/types/TPosition";
-import { clampToBoard } from "@/utils/math";
+import { clampToBoard, inRange } from "@/utils/math";
 import { Cell } from "../Cell";
 import Model from "./BoardModel";
 import View from "./BoardView";
@@ -30,22 +30,58 @@ class Board implements IComponent {
     }
 
     start() {}
-
+    
+    fight(opponent: TPiece) {
+        const piece = this.model.getSelectedPiece();
+        const move = { from: { row: piece.row, col: piece.col }, to: { row: opponent.row, col: opponent.col } };
+        this.model.makeMove(move);
+        this.clearSelection();
+    }
+    
     onPieceClick(piece: TPiece) {
-        // TODO: implement
+        if (this.isOpponentPiece(piece)) {
+            this.makeMove({
+                piece: this.model.getSelectedPiece(),
+                cell: this.cells[piece.row][piece.col],
+                pieceToKill: piece
+            });
+        }
+        if (!this.isValidPiece(piece)) return;
+        piece.select();
         this.model.setSelectedPiece(piece);
         this.highlightPossibleMoves(piece);
     }
 
     onCellClick(cell: Cell) {
-        // TODO: implement
         const piece = this.model.getSelectedPiece();
 
         if (piece && cell.isHighlighted) {
-            this.model.makeMove({ from: piece.position, to: cell.position });
-            this.model.state.selection.piece.move(cell.row, cell.col);
-            this.model.clearSelection();
+            this.makeMove({ piece, cell });
         }
+    }
+
+    async makeMove(params: { piece?: TPiece, cell?: Cell, pieceToKill?: TPiece } = {}) {
+        const { piece, cell, pieceToKill } = params;
+        const move = { from: { row: piece.row, col: piece.col }, to: { row: cell.row, col: cell.col } };
+        pieceToKill && pieceToKill.kill();
+        await this.model.getSelectedPiece().move(move.to);
+        
+        pieceToKill && this.killPiece(pieceToKill);
+        this.model.makeMove(move);
+        this.clearSelection();
+    }
+
+    killPiece(pieceToKill: TPiece) {
+        this.pieces.splice(this.pieces.indexOf(pieceToKill), 1);
+    }
+
+    getPieceByPosition(position: TPosition) {
+        return this.pieces.find(piece => piece.row === position.row && piece.col === position.col);
+    }
+    
+    clearSelection() {
+        this.model.clearSelection();
+        this.cells.forEach(row => row.forEach(cell => cell.dehighlight()));
     }
 
     highlightPossibleMoves(piece: TPiece) {
@@ -77,10 +113,20 @@ class Board implements IComponent {
         return moves;
     }
 
+    isOpponentPiece(piece: TPiece) {
+        const selected = this.model.getSelectedPiece();
+        return selected && selected.model.team !== piece.model.team;
+    }
+
     isValidPosition(position: TPosition): boolean {
-        const open = this.model.state.map[position.row][position.col] === 0;
-        if (!open) return false;
+        const pawn = this.model.getSelectedPiece();
+        const cellValue = this.model.state.map[position.row][position.col];
+        if (pawn.isWhite ? inRange(cellValue, 1, 6) : inRange(cellValue, 7, 12)) return false;
         return true;
+    }
+
+    isValidPiece(piece: TPiece) {
+        return piece.isWhite === this.model.isWhiteTurn || piece.isBlack && this.model.isBlackTurn;
     }
 
 }
