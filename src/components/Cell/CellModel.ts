@@ -1,31 +1,42 @@
 import { IModel } from "@/interfaces";
+import { TPiece } from "@/types";
 
 class CellModel implements IModel {
 
   state: { 
-    isOpen: boolean; 
+    isOccupied: boolean; 
     isSelected: boolean;
     isHighlighted: boolean;
+    piece: TPiece;
     position: { row: number; col: number; };
   };
 
   name: string;
   color: number;
+  colors: { default: number; move: number; attack: number; };
   
   constructor(row: number, col: number) {
     this.name =  `${String.fromCharCode(97 + col)}${row + 1}`;
-    this.color = (row + col) % 2 === 0 ? 0x333333 : 0xeeeeee;
+    this.colors = {
+      default: (row + col) % 2 === 0 ? 0x333333 : 0xeeeeee,
+      move: 0x2222ff,
+      attack: 0xd35656,
+    }
 
     this.state = {
-      isOpen: false,
+      isOccupied: false,
       isSelected: false,
       isHighlighted: false,
+      piece: null,
       position: { row, col }
     };
   }
 
-  setSelected(isSelected: boolean) {
-    this.state.isSelected = isSelected;
+  reset() {
+    this.state.isOccupied = false;
+    this.state.isSelected = false;
+    this.state.isHighlighted = false;
+    this.state.piece = null;
   }
 
   setPosition(row: number, col: number) {
@@ -37,9 +48,6 @@ class CellModel implements IModel {
     this.state.isHighlighted = isHighlighted;
   }
 
-  setOpen(isOpen: boolean) {
-    this.state.isOpen = isOpen;
-  }
 }
 
 export default CellModel;

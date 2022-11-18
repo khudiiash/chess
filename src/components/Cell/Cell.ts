@@ -1,7 +1,8 @@
-import { IComponent } from "@/interfaces";
+import {InteractiveComponent} from "@/components/Base";
+import { TPiece } from "@/types";
+
 import View from "./CellView";
 import Model from "./CellModel";
-import {InteractiveComponent} from "@/components/Base";
 
 class Cell extends InteractiveComponent {
     
@@ -9,11 +10,11 @@ class Cell extends InteractiveComponent {
     view: View;
     mesh: THREE.Mesh;
  
-    constructor(row: number, col: number) {
+    constructor(row: number, col: number, resources: any) {
       super();
       this.model = new Model(row, col);
       this.view = new View();
-      this.view.build({ x: row, z: col, color: this.model.color });
+      this.view.build({ x: row, z: col, color: this.model.colors.default, resources});
       this.makeClickable();
     }
 
@@ -21,21 +22,16 @@ class Cell extends InteractiveComponent {
       return {...this.model.state.position};
     }
 
-    get isHighlighted() {
-      return this.model.state.isHighlighted;
+    reset() {
+      this.model.reset();
+      this.view.reset();
     }
 
-    select() {
-      
-    }
-
-    deselect() {
-      
-    }
 
     highlight() {
       this.model.setHighlighted(true);
-      this.view.highlight();
+      const color = this.isOccupied ? this.model.colors.attack : this.model.colors.move;
+      this.view.highlight(color);
     }
 
     dehighlight() {
@@ -44,8 +40,9 @@ class Cell extends InteractiveComponent {
     }
 
     onClick(): void {
-      this.select();
+      
     }
+
 
     get row() {
       return this.model.state.position.row;
@@ -53,6 +50,14 @@ class Cell extends InteractiveComponent {
 
     get col() {
       return this.model.state.position.col;
+    }
+
+    get isHighlighted() {
+      return this.model.state.isHighlighted;
+    }
+
+    get isOccupied() {
+      return this.model.state.isOccupied;
     }
     
 

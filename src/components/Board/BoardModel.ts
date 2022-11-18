@@ -1,35 +1,27 @@
-import { TBoardMap, TPiece } from "@/types";
+import { TBoardMap, TMove, TPiece } from "@/types";
 import { TPosition } from "@/types/TPosition";
-import { Cell } from "../Cell";
-import PieceFactory from "@/components/Base/PieceFactory";
 
 class BoardModel {
   
-  map: number[][];
   coords: number[][];
-  pieceFactory: PieceFactory;
-  history: number[][][] = [];
-  state: { map: any; turn: string, selection: { piece: any; cell: any; }; };
+  isRestore: boolean = false;
+  state: { map: any; turn: string, selection: TPosition; history: TMove[] };
   
   constructor() {
-    this.pieceFactory = new PieceFactory();
-    this.history.push(this.map);
-
+    const localState = JSON.parse(localStorage.getItem('state'));
+    if (localState) {
+      this.isRestore = true;
+    }
     this.state = {
-      map: this.startMap,
-      turn: 'white',
-      selection: { piece: null, cell: null } 
+      map: localState?.map || this.startMap,
+      turn: localState?.turn || 'white',
+      selection: localState?.selection || { row: null, col: null},
+      history: localState?.history || []
     }
   }
 
   setSelectedPiece(piece: TPiece) {
-    this.state.selection.piece = piece;
-    this.state.selection.cell = null;
-  }
-
-  setSelectedCell(cell: Cell) {
-    this.state.selection.cell = cell;
-    this.state.selection.piece = null;
+    Object.assign(this.state.selection, piece.position);
   }
 
   getPossibleMoves(piece: TPiece) {
@@ -37,31 +29,41 @@ class BoardModel {
     return moves;
   }
 
-  getSelectedCell() {
-    return this.state.selection.cell;
-  }
 
-  getSelectedPiece() {
-    return this.state.selection.piece;
+  getSelectedPiecePosition(): TPosition {
+    return this.state.selection;
   }
 
   nextTurn() {
-    this.history.push(this.state.map);
     this.state.turn = this.state.turn === 'white' ? 'black' : 'white';
   }
 
-  makeMove(move: { from: TPosition; to: TPosition; }) {
-    const { from, to } = move;
+  restart() {
+    this.state.map = [...this.startMap];
+    this.state.turn = 'white';
+    this.state.selection.row = null;
+    this.state.selection.col = null;
+    this.state.history.length = 0;
+    this.writeStateToLocalStorage();
+  }
+
+  makeMove([from, to]: TMove) {
     const piece = this.state.map[from.row][from.col];
     this.state.map[from.row][from.col] = 0;
     this.state.map[to.row][to.col] = piece;
+    this.state.history.push([from, to]);
     this.nextTurn();
+    this.writeStateToLocalStorage();
+
+  }
+
+  writeStateToLocalStorage() {
+    localStorage.setItem('state', JSON.stringify(this.state));
   }
 
   clearSelection() {
-    this.state.selection.piece.deselect();
-    this.state.selection.piece = null;
-    this.state.selection.cell = null;
+    this.state.selection.row = null;
+    this.state.selection.col = null;
   }
 
   get isWhiteTurn() {

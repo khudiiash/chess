@@ -5,48 +5,68 @@ import { TPosition } from '@/types/TPosition';
 
 import BasePieceModel from './BasePieceModel';
 import BasePieceView from './BasePieceView';
+import { Cell } from '@/components/Cell';
+import { TResources } from '@/types';
 
 class BasePiece extends InteractiveComponent {
 
     value: number;
     color: number;
     mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
-    team: string;
     model: BasePieceModel;
     view: BasePieceView;
+    validMoves: TPosition[];
+    resources: TResources;
 
-    constructor(value: number) {
-      super();
-      this.model = new BasePieceModel(value);
-      this.view = new BasePieceView();
+    build() {
+      this.view.build({
+        size: this.model.size,
+        color: this.model.color,
+        team: this.model.team,
+        type: this.model.type
+      });
+      this.view.setPosition(this.position);
+      this.makeClickable();
+    }
+
+    setValidMoves(moves: TPosition[]) {
+      this.model.validMoves = moves;
+    }
+    
+    getValidMoves() {
+      return this.model.validMoves;
+    }
+
+    reset() {
+      this.model.reset();
+      this.view.reset();
+      this.view.setPosition(this.position);
     }
    
-    setPosition(row: number, col: number) {
-      this.model.setPosition(row, col);
-      this.view.setPosition(row, col);
+    setPosition(position: TPosition) {
+      // set position immediately
+      this.model.setPosition(position);
+      this.view.setPosition(position);
     }
 
-    move(move: TPosition) {
-      if (!this.model.originalPosition) {
-        this.model.setOriginalPosition(move.row, move.col);
-      }
-      this.model.setPosition(move.row, move.col);
-      return this.view.move(move.row, move.col);
+    move(position: TPosition, instantly = false) {
+      // set position with animation
+      this.model.setPosition(position);
+      this.model.setHasMoved(true);
+      instantly ? this.view.setPosition(position) : this.view.move(position);
     }
 
     select() {
-      this.model.setSelected(true);
-      this.view.select();
+      this.model.selected = true;
     }
 
     deselect() {
-      this.model.setSelected(false);
-      this.view.deselect();
+      this.model.selected = false;
     }
 
-    kill() {
+    kill(instantly = false) {
       this.model.kill();
-      this.view.kill();
+      this.view.kill(instantly);
     }
 
     onClick(): void {
@@ -83,16 +103,16 @@ class BasePiece extends InteractiveComponent {
       return possibleMoves.filter(move => move.length > 0);
     }
 
+    canMoveTo({row, col}: TPosition) {
+      return this.model.validMoves.some(move => move.row === row && move.col === col);
+    }
+
     get position() {
-      return {row: this.model.state.position.row, col: this.model.state.position.col};
+      return this.model.position;
     }
 
-    get row() {
-      return this.model.state.position.row;
-    }
-
-    get col() {
-      return this.model.state.position.col;
+    get team() {
+      return this.model.team;
     }
 
     get isKing() {
@@ -119,8 +139,15 @@ class BasePiece extends InteractiveComponent {
     get isBlack() {
       return this.model.team === 'black';
     }
+
     get hasMoved() {
-      return this.model.hasMoved();
+      return this.model.hasMoved;
+    }
+    get isAlive() {
+      return this.model.isAlive;
+    }
+    get isDead() {
+      return this.model.isDead;
     }
 
 

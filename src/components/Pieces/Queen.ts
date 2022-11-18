@@ -1,26 +1,25 @@
 import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+import { IPieceConstructorParams } from "@/interfaces/Piece";
 import { TMovesMap } from "@/types";
 
 
 
 class Queen extends BasePiece {
 
-  constructor(value: number) {
-    super(value);
-    this.model = new QueenModel(value);
-    this.view = new QueenView();
-    this.view.build({ size: this.model.size, color: this.model.color,  team: this.model.team  });
-    this.makeClickable();
+  constructor(params: IPieceConstructorParams) {  
+    super();
+    this.model = new QueenModel(params);
+    this.view = new QueenView(params);
+    this.build();
   }
 
 }
 
 class QueenModel extends BasePieceModel {
 
-  constructor(value: number) {
-    super(value);
+  constructor(params: IPieceConstructorParams) {
+    super(params);
     this.type = 'queen';
-    this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
 
   get moves(): TMovesMap {
@@ -31,10 +30,6 @@ class QueenModel extends BasePieceModel {
 }
 
 class QueenView extends BasePieceView {
-  
-    constructor() {
-      super();
-    }
   
 }
 

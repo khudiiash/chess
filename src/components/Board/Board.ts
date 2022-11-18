@@ -1,10 +1,11 @@
 import { IComponent } from "@/interfaces";
-import { TPiece } from "@/types";
-import { TPosition } from "@/types/TPosition";
-import { clampToBoard, inRange } from "@/utils/math";
-import { Cell } from "../Cell";
+import { TMove, TMoveOptions, TPiece,TPosition, TResources } from "@/types";
+import { inRange } from "@/utils/math";
+import { Cell, Observer } from "@/components";
+
 import Model from "./BoardModel";
 import View from "./BoardView";
+import { areOpponentValues } from "@/utils/board";
 
 class Board implements IComponent {
     
@@ -14,6 +15,7 @@ class Board implements IComponent {
     pieces: TPiece[];
     whites: TPiece[];
     blacks: TPiece[];
+    observer: Observer;
 
     constructor() {
         this.model = new Model();
@@ -22,111 +24,168 @@ class Board implements IComponent {
         this.pieces = [];
     }
 
-    build() : void {
-        this.view.build({ cellComponents: this.cells });
-        this.view._buildPiecesFromBoard(this.model.state.map, this.model.pieceFactory, this.pieces);
+    build(resources: TResources) : void {
+        this.view.build(resources);
+        this.view.buildCells(this.cells, resources);
+        this.view.buildPieces(this.model.startMap, this.pieces, resources);
+        this.reproduceHistory(this.model.state.history);
+        this._setObserver();
+        this._setHandlers();
+    }
+
+    private _setObserver() {
+        this.observer = new Observer();
+        this.observer.subscribe(this.observer.events.restart, this.restart.bind(this));
+    }
+
+    private _setHandlers() {
         this.pieces.forEach(piece => piece.addHandler('click', this.onPieceClick.bind(this)));
         this.cells.flat().forEach(cell => cell.addHandler('click', this.onCellClick.bind(this)));
     }
 
-    start() {}
-    
-    fight(opponent: TPiece) {
-        const piece = this.model.getSelectedPiece();
-        const move = { from: { row: piece.row, col: piece.col }, to: { row: opponent.row, col: opponent.col } };
-        this.model.makeMove(move);
+    reproduceHistory(history: TMove[]) {
+        history.forEach(move => {
+            this.makeMove(move, { instantly: true, shouldRecord: false });
+        });
+    }
+
+    getPieceOnPosition(position: TPosition) {
+        return this.pieces.find(piece => this.positionsMatch(piece.position, position));
+    }
+
+    getCellOnPosition(position: TPosition) {
+        return this.cells[position.row][position.col];
+    }
+
+    restart() {
         this.clearSelection();
+        this.model.restart();
+        this.cells.flat().forEach(cell => cell.reset());
+        this.pieces.forEach(piece => piece.reset());
+    }
+
+    start() {}
+
+    getSelectedPiece(): TPiece | null {
+        const position = this.model.getSelectedPiecePosition();
+        if (position.row === null) return null;
+        return this.pieces.find(piece => piece.isAlive && this.positionsMatch(piece.position, position));
     }
     
     onPieceClick(piece: TPiece) {
-        if (this.isOpponentPiece(piece)) {
-            this.makeMove({
-                piece: this.model.getSelectedPiece(),
-                cell: this.cells[piece.row][piece.col],
-                pieceToKill: piece
-            });
+        const selectedPiece = this.getSelectedPiece();
+        
+        if (this.areOpponents(selectedPiece, piece) && selectedPiece?.canMoveTo(piece.position)) {
+           this.makeMove([selectedPiece.position, piece.position]);
+           return;
         }
-        if (!this.isValidPiece(piece)) return;
+
+        this.isValidPieceToMove(piece) && this.selectPiece(piece);
+    }
+
+    areOpponents(piece1: TPiece, piece2: TPiece) {
+        return piece1 && piece2 && (piece1.model.team !== piece2.model.team);
+    }
+
+    selectPiece(piece: TPiece) {
         piece.select();
         this.model.setSelectedPiece(piece);
         this.highlightPossibleMoves(piece);
+        this.view.selectPiece(piece.view.mesh);
     }
 
-    onCellClick(cell: Cell) {
-        const piece = this.model.getSelectedPiece();
+    onCellClick(cell: Cell): void{
+        const piece = this.getSelectedPiece();
+        if (!piece) return;
+        if (this.positionsMatch(piece.position, cell.position)) return;
 
-        if (piece && cell.isHighlighted) {
-            this.makeMove({ piece, cell });
-        }
-    }
-
-    async makeMove(params: { piece?: TPiece, cell?: Cell, pieceToKill?: TPiece } = {}) {
-        const { piece, cell, pieceToKill } = params;
-        const move = { from: { row: piece.row, col: piece.col }, to: { row: cell.row, col: cell.col } };
-        pieceToKill && pieceToKill.kill();
-        await this.model.getSelectedPiece().move(move.to);
-        
-        pieceToKill && this.killPiece(pieceToKill);
-        this.model.makeMove(move);
+        piece.canMoveTo(cell.position) && this.makeMove([piece.position, cell.position]);
         this.clearSelection();
     }
 
-    killPiece(pieceToKill: TPiece) {
-        this.pieces.splice(this.pieces.indexOf(pieceToKill), 1);
+    positionsMatch(pos1: TPosition, pos2: TPosition) {
+        return pos1.row === pos2.row && pos1.col === pos2.col;
     }
 
-    getPieceByPosition(position: TPosition) {
-        return this.pieces.find(piece => piece.row === position.row && piece.col === position.col);
+    makeMove([fromPos, toPos]: TMove, { instantly, shouldRecord }: TMoveOptions = { instantly: false, shouldRecord: true }) {
+        const [from, to] = [{...fromPos}, {...toPos}];
+        shouldRecord && this.model.makeMove([from, to]);
+        this.getPieceOnPosition(to)?.kill(instantly);
+        this.getPieceOnPosition(from)?.move(to, instantly);
+        this.clearSelection();
     }
     
     clearSelection() {
+        this.view.deselectPiece();
+        this.getSelectedPiece()?.deselect();
         this.model.clearSelection();
         this.cells.forEach(row => row.forEach(cell => cell.dehighlight()));
     }
 
     highlightPossibleMoves(piece: TPiece) {
-       const moves = this.getValidPositions(piece.getPossibleMoves());
-       this.cells.forEach(row => row.forEach(cell => cell.dehighlight()));
-       moves.forEach((position: TPosition) => {
-        const cell = this.cells[position.row][position.col];
-        cell.highlight();
-       });
+        const moves = this.getValidPositions(piece.getPossibleMoves());
+        const validMoves: TPosition[] = [];
+        this.cells.forEach(row => row.forEach(cell => cell.dehighlight()));
+        
+        moves.forEach((position: TPosition) => {
+            validMoves.push(position);
+            const cell = this.cells[position.row][position.col];
+            cell.highlight();
+        });
+
+        piece.setValidMoves(validMoves);
     }
 
     getValidPositions(positions: TPosition[] | TPosition[][]): TPosition[] {
-        const moves = [];
+        const moves: TPosition[] = [];
         for (const position of positions) {
             if (Array.isArray(position)) {
                 for (const pos of position) {
-                    if (this.isValidPosition(pos)) {
+                    const res = this.checkPosition(pos);
+                    if (res.empty) {
                         moves.push(pos);
-                    } else {
+                    } 
+                    else if (res.opponent) {
+                        moves.push(pos);
+                        break;
+                    }
+                    else if (res.teammate) {
                         break;
                     }
                 }
             }
             else {
-                this.isValidPosition(position) && moves.push(position);
+                const res = this.checkPosition(position);
+                if (res.empty || res.opponent) {
+                    moves.push(position);
+                }
             }
         }
 
         return moves;
     }
 
+    isTeamPiece(piece: TPiece) {
+        return piece.model.team === this.getSelectedPiece()?.model.team;
+    }
+
     isOpponentPiece(piece: TPiece) {
-        const selected = this.model.getSelectedPiece();
-        return selected && selected.model.team !== piece.model.team;
+        return this.getSelectedPiece() && (piece.model.team !== this.getSelectedPiece().model.team);
     }
 
-    isValidPosition(position: TPosition): boolean {
-        const pawn = this.model.getSelectedPiece();
+    checkPosition(position: TPosition): { empty: boolean, teammate: boolean, opponent: boolean } {
+        const res = { empty: false, opponent: false, teammate: false}
+        const piece = this.getSelectedPiece();
         const cellValue = this.model.state.map[position.row][position.col];
-        if (pawn.isWhite ? inRange(cellValue, 1, 6) : inRange(cellValue, 7, 12)) return false;
-        return true;
+        
+        res.opponent = cellValue && areOpponentValues(piece.model.value, cellValue);
+        res.teammate = cellValue && !areOpponentValues(piece.model.value, cellValue);
+        res.empty = cellValue === 0;
+        return res;
     }
 
-    isValidPiece(piece: TPiece) {
-        return piece.isWhite === this.model.isWhiteTurn || piece.isBlack && this.model.isBlackTurn;
+    isValidPieceToMove(piece: TPiece) {
+        return (piece.isWhite && this.model.isWhiteTurn) || (piece.isBlack && this.model.isBlackTurn);
     }
 
 }

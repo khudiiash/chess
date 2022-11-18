@@ -1,3 +1,5 @@
+import { Cell } from "@/components/Cell";
+import { IPieceConstructorParams, IPieceModelConstructorParams } from "@/interfaces/Piece";
 import { TSize, TPosition, TMovesMap } from "@/types";
 
 class BasePieceModel {
@@ -8,60 +10,96 @@ class BasePieceModel {
   color: number;
   team: string;
   type: string;
-  originalPosition: TPosition = null;
 
   state: {
+    id: string;
     isSelected: boolean;
-    isHovered: boolean;
     isAlive: boolean;
-    position: {
-      row: number;
-      col: number;
-    };
+    hasMoved: boolean;
+    position: TPosition;
+    startPosition: TPosition;
+    validMoves: TPosition[];
   }
 
-  constructor(value: number) {
-    this.size = { width: 0.5, height: 0.5, depth: 0.5 };
+  constructor({value, row, col}: IPieceConstructorParams) {
     this.type = 'base';
     this.value = value;
     this.team = value > 6 ? 'black' : 'white';
     this.color = value > 6 ? 0x333333 : 0xeeeeee;
 
     this.state = {
+      // generate random hex id
+      id: Math.floor(Math.random() * 16777215).toString(16),
       isSelected: false,
-      isHovered: false,
       isAlive: true,
+      hasMoved: false,
       position: {
-        row: 0,
-        col: 0
-      }
+        row: row,
+        col: col
+      },
+      startPosition: {
+        row: row,
+        col: col
+      },
+      validMoves: []
     }
   }
 
-  setOriginalPosition(row: number, col: number) {
-    if (this.originalPosition) return;
-    this.originalPosition = { row, col };
+  reset() {
+    this.state.isSelected = false;
+    this.state.hasMoved = false;
+    this.state.isAlive = true;
+    this.state.position.col = this.state.startPosition.col;
+    this.state.position.row = this.state.startPosition.row;
+    this.state.validMoves.length = 0;
+  }
+ 
+  kill() {
+    this.state.position.row = -1;
+    this.state.position.col = -1;
+    this.state.isAlive = false;
   }
 
-  setPosition(row: number, col: number) {
-    this.state.position.row = row;
-    this.state.position.col = col;
+  set validMoves(moves: TPosition[]) {
+    this.state.validMoves.length = 0;
+    this.state.validMoves.push(...moves);
   }
 
-  setSelected(isSelected: boolean) {
+  get validMoves(): TPosition[] {
+    return this.state.validMoves;
+  }
+
+  setPosition(position: TPosition) {
+    this.state.position.row = position.row;
+    this.state.position.col = position.col;
+  }
+
+  setHasMoved(hasMoved: boolean) {
+    this.state.hasMoved = hasMoved;
+  }
+
+  get position(): TPosition {
+    return this.state.position;
+  }
+
+  set selected(isSelected: boolean) {
     this.state.isSelected = isSelected;
   }
 
-  setHovered(isHovered: boolean) {
-    this.state.isHovered = isHovered;
+  get selected(): boolean {
+    return this.state.isSelected;
   }
 
-  hasMoved(): boolean {
-    return !!this.originalPosition;
+  get hasMoved(): boolean {
+    return this.state.hasMoved;
   }
 
-  kill() {
-    this.state.isAlive = false;
+  get isAlive(): boolean {
+    return this.state.isAlive;
+  }
+
+  get isDead(): boolean {
+    return !this.state.isAlive;
   }
 
   get moves(): TMovesMap {

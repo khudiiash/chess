@@ -1,23 +1,22 @@
 import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+import { IPieceConstructorParams } from "@/interfaces/Piece";
 
 class Rook extends BasePiece {
 
-  constructor(value: number) {
-    super(value);
-    this.model = new RookModel(value);
-    this.view = new RookView();
-    this.view.build({ size: this.model.size, color: this.model.color,  team: this.model.team });
-    this.makeClickable();
+  constructor(params: IPieceConstructorParams) {  
+    super();
+    this.model = new RookModel(params);
+    this.view = new RookView(params);
+    this.build();
   }
 
 }
 
 class RookModel extends BasePieceModel {
 
-  constructor(value: number) {
-    super(value);
+  constructor(params: IPieceConstructorParams) {
+    super(params);
     this.type = 'rook';
-    this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
 
   get moves(): any {
@@ -30,9 +29,6 @@ class RookModel extends BasePieceModel {
 
 class RookView extends BasePieceView {
   
-    constructor() {
-      super();
-    }
 }
 
 

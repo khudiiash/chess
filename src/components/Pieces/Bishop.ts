@@ -1,24 +1,23 @@
 import { TMovesMap } from "@/types";
 import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+import { IPieceConstructorParams } from "@/interfaces/Piece";
 
 class Bishop extends BasePiece {
 
-  constructor(value: number) {  
-    super(value);
-    this.model = new BishopModel(value);
-    this.view = new BishopView();
-    this.view.build({ size: this.model.size, color: this.model.color, team: this.model.team });
-    this.makeClickable();
+  constructor(params: IPieceConstructorParams) {  
+    super();
+    this.model = new BishopModel(params);
+    this.view = new BishopView(params);
+    this.build();
   }
 
 }
 
 class BishopModel extends BasePieceModel {
 
-  constructor(value: number) {
-    super(value);
+  constructor(params: IPieceConstructorParams) {
+    super(params);
     this.type = 'bishop';
-    this.size = { width: 0.5, height: 1, depth: 0.5 };
   }
 
   get moves(): TMovesMap {
@@ -30,10 +29,6 @@ class BishopModel extends BasePieceModel {
 }
 
 class BishopView extends BasePieceView {
-  
-    constructor() {
-      super();
-    }
   
 }
 

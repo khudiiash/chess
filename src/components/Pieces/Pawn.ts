@@ -1,33 +1,31 @@
 import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+import { IPieceConstructorParams } from "@/interfaces/Piece";
 import { TMovesMap } from "@/types";
 
 class Pawn extends BasePiece {
 
-  constructor(value: number) {
-    super(value);
-    this.model = new PawnModel(value);
-    this.view = new PawnView();
-    this.view.build({ size: this.model.size, color: this.model.color,  team: this.model.team  });
-    this.makeClickable();
+  constructor(params: IPieceConstructorParams) {  
+    super();
+    this.model = new PawnModel(params);
+    this.view = new PawnView(params);
+    this.build();
   }
 
 }
 
-
 class PawnModel extends BasePieceModel {
 
-  constructor(value: number) {
-    super(value);
+  constructor(params: IPieceConstructorParams) {
+    super(params);
     this.type = 'pawn';
-    this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
 
   get moves(): TMovesMap {
     const moves = [ [1, -1],  [1, 0],  [1, 1],
               [0, -1],           [0, 1],
               [-1, -1], [-1, 0], [-1, 1]];
-    if (!this.originalPosition) {
-      moves.push([2, 0]);
+    if (!this.state.hasMoved) {
+      moves.push([2, 0], [-2, 0]);
     }
     return moves;
   }
@@ -35,10 +33,6 @@ class PawnModel extends BasePieceModel {
 }
 
 class PawnView extends BasePieceView {
-  
-    constructor() {
-      super();
-    }
   
 }
 

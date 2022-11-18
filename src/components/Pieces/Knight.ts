@@ -1,24 +1,23 @@
 import { TMovesMap } from "@/types";
 import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
+import { IPieceConstructorParams } from "@/interfaces/Piece";
 
 class Knight extends BasePiece {
 
-  constructor(value: number) {
-    super(value);
-    this.model = new KnightModel(value);
-    this.view = new KnightView();
-    this.view.build({ size: this.model.size, color: this.model.color, team: this.model.team  });
-    this.makeClickable();
+  constructor(params: IPieceConstructorParams) {  
+    super();
+    this.model = new KnightModel(params);
+    this.view = new KnightView(params);
+    this.build();
   }
   
 }
 
 class KnightModel extends BasePieceModel {
 
-  constructor(value: number) {
-    super(value);
+  constructor(params: IPieceConstructorParams) {
+    super(params);
     this.type = 'knight';
-    this.size = { width: 0.5, height: 0.8, depth: 0.5 };
   }
 
   get moves(): TMovesMap {
@@ -30,8 +29,8 @@ class KnightModel extends BasePieceModel {
 
 class KnightView extends BasePieceView {
   
-    constructor() {
-      super();
+    build(config: any) {
+      super.build(config);
     }
   
 }

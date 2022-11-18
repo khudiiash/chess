@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js' 
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import gsap from 'gsap';
 
 export class Scene {
   private _scene: THREE.Scene;
@@ -8,33 +11,81 @@ export class Scene {
   private _controls: OrbitControls;
 
   lights: { ambient: THREE.AmbientLight; directional: THREE.DirectionalLight; };
+  _loadingManager: THREE.LoadingManager;
+  _modelLoader: GLTFLoader;
+  models: { [key: string]: THREE.Mesh; } = {};
+  textures: any;
 
-  build() {
+  build(onLoad: Function) {
+    this._loadingManager = new THREE.LoadingManager()
+    this._modelLoader = new GLTFLoader(this._loadingManager)
+    this._modelLoader.setDRACOLoader(new DRACOLoader().setDecoderPath('/draco/'))
+
+    this._loadModels();
+    this._loadTextures();
+
+    this._loadingManager.onLoad = () => onLoad({ models: this.models, textures: this.textures });
     this._scene = new THREE.Scene();
     this._camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
     this._renderer = new THREE.WebGLRenderer({ antialias: true });
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
+    
     this._controls = new OrbitControls( this._camera, this._renderer.domElement );
-
     this._camera.position.set(0, 5, 8);
     this._camera.lookAt(0, 0, 0);
-    this.setLight();
-    this.render();
+    this._buildLights();
+    
+    window.addEventListener('resize', this._onResize.bind(this));
+    this._render();
+    
   }
 
-  setLight() {
+  private _loadModels() {
+    const models = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+    models.forEach((name) => {
+      this._modelLoader.load(`/models/${name}.glb`, (model) => this._onModelLoaded(name, model));
+    });
+  }
+
+  private _loadTextures() {
+    const loader = new THREE.TextureLoader(this._loadingManager);
+    
+    this.textures = {
+      marble: { ao: null, diffuse: null, roughness: null, metalness: null, normal: null },
+      fine_wood: { ao: null, diffuse: null, normal: null }
+    };
+
+    const types = ['displacement', 'normal', 'specular', 'ao', 'diffuse', 'roughness', 'metalness'];
+    const materials = ['fine_wood', 'marble'];
+    materials.forEach((material) => {
+      types.forEach((type) => {
+        if (!(type in this.textures[material])) return;
+        const extension = material === 'fine_wood' ? 'jpg' : 'png';
+        this.textures[material][type] = loader.load(`/textures/${material}/${material}_${type}.${extension}`, () => {}, (e)=>console.warn(e));
+      });
+    });
+   
+  }
+
+  private _onModelLoaded(name: string, model: any) {
+    const mesh =  model.scene.children[0];
+    mesh.scale.setScalar(1.6);
+    this.models[name] = mesh;
+  }
+
+  private _buildLights() {
     const ambient = new THREE.AmbientLight(0x404040); // soft white light
     const directional = new THREE.DirectionalLight(0xffffff, 1);
 
     this._renderer.shadowMap.enabled = true;
     this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     directional.castShadow = true;
-    directional.shadow.mapSize.width = 1024;
-    directional.shadow.mapSize.height = 1024;
+    directional.shadow.mapSize.width = 4096;  // default
+    directional.shadow.mapSize.height = 4096;
     directional.shadow.camera.near = 0;
     directional.shadow.camera.far = 500;
-    directional.position.set(5, 10, 5);
+    directional.position.set(2, 8, -5);
     this.lights = { ambient, directional };
     this.add(directional)
     this.add(ambient);
@@ -44,14 +95,22 @@ export class Scene {
     this._scene.add(mesh);
   }
 
+  fadeMainLight() {
+    gsap.to(this.lights.directional, { intensity: 0.4, duration: 1 });
+  }
+
+  restoreMainLight() {
+    gsap.to(this.lights.directional, { intensity: 1, duration: 1 });
+  }
+
   remove(mesh: THREE.Mesh) {  
     this._scene.remove(mesh);
   }
 
-  render() {
+  private _render() {
     this._renderer.render(this._scene, this._camera);
     this._controls.update();
-    requestAnimationFrame(this.render.bind(this));
+    requestAnimationFrame(this._render.bind(this));
   }
 
   onClick(event: MouseEvent) {
@@ -69,12 +128,17 @@ export class Scene {
     }
   }
 
-  get children() {
-    return this._scene.children;
+  private _onResize() {
+    this._camera.aspect = window.innerWidth / window.innerHeight;
+    this._camera.updateProjectionMatrix();
+    this._renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  traverse(callback: (child: THREE.Object3D) => void) {
+  private _traverse(callback: (child: THREE.Object3D) => void) {
     return this._scene.traverse(callback);
   }
 
+  get children() {
+    return this._scene.children;
+  }
 }
