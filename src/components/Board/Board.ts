@@ -31,6 +31,8 @@ class Board implements IComponent {
         this.reproduceHistory(this.model.state.history);
         this._setObserver();
         this._setHandlers();
+
+        this.observer.emit(this.observer.events.turn, this.model.state.turn);
     }
 
     private _setObserver() {
@@ -62,6 +64,7 @@ class Board implements IComponent {
         this.model.restart();
         this.cells.flat().forEach(cell => cell.reset());
         this.pieces.forEach(piece => piece.reset());
+        this.observer.emit(this.observer.events.turn, this.model.state.turn);
     }
 
     start() {}
@@ -113,6 +116,7 @@ class Board implements IComponent {
         this.getPieceOnPosition(to)?.kill(instantly);
         this.getPieceOnPosition(from)?.move(to, instantly);
         this.clearSelection();
+        this.observer?.emit(this.observer.events.turn, this.model.state.turn);
     }
     
     clearSelection() {
@@ -130,7 +134,8 @@ class Board implements IComponent {
         moves.forEach((position: TPosition) => {
             validMoves.push(position);
             const cell = this.cells[position.row][position.col];
-            cell.highlight();
+            const piece = this.getPieceOnPosition(position);
+            cell.highlight(piece);
         });
 
         piece.setValidMoves(validMoves);

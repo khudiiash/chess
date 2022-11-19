@@ -28,9 +28,9 @@ class Cell extends InteractiveComponent {
     }
 
 
-    highlight() {
+    highlight(piece: TPiece) {
       this.model.setHighlighted(true);
-      const color = this.isOccupied ? this.model.colors.attack : this.model.colors.move;
+      const color = piece ? this.model.colors.attack : this.model.colors.move;
       this.view.highlight(color);
     }
 

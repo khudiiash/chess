@@ -19,6 +19,8 @@ class Observer {
     return {
       restart: 'restart',
       continue: 'continue',
+      turn: 'turn',
+      gameover: 'gameover',
     }
   }
 

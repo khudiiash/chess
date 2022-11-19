@@ -1,0 +1,82 @@
+* {
+  user-select: none;
+}
+.turn-container {
+  position: fixed;
+  top: 10px;
+  left: calc(50vw - 50px);
+  width: 110px;
+  height: 50px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.turn {
+  width: 50px;
+  height: 50px;
+  user-select: none;
+  background-color: transparent; 
+  background-size: cover;
+  background-position: center;
+  border: none;
+  outline: none;
+};
+
+.turn-frame {
+  position: absolute;
+  width: 48px;
+  height: 50px;
+  left: 0px;
+  background-color: transparent;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid orange;
+  border-radius: 2px;
+}
+
+.open-menu-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 60px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.5);
+  user-select: none;
+  outline: none;
+  border: none;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 3px;
+};
+
+.menu-button {
+  width: 120px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(5px);
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 2px;
+  margin: 10px;
+  outline: none;
+  border: none;
+  text-transform: uppercase;
+};
+
+.menu {
+  backdrop-filter: blur(10px);
+  background-color: rgba(155, 155, 155, 0.15);
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+};

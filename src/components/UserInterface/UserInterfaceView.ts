@@ -1,28 +1,43 @@
 import { IView } from "@/interfaces";
 import gsap from 'gsap';
+import gsapTrial from "gsap-trial";
+import './ui.scss';
 
 class UserInterfaceView implements IView {
   container: HTMLDivElement;
   buttonsPanel: any;
-  styles: any;
   menu: HTMLDivElement;
   menuTimeline: gsap.core.Timeline;
+  turnContainer: HTMLDivElement;
+
   constructor() {
 
   }
 
-  build({ styles }: any) {
-    this.styles = styles;
+  build() {
     this._createMenu();
+    this._createTurnContainer();
   }
-
+ 
+  private _createTurnContainer() {
+    this.turnContainer = document.createElement('div');
+    this.turnContainer.classList.add('turn-container');
+    const frame = document.createElement('div');
+    frame.classList.add('turn-frame');
+    this.turnContainer.appendChild(frame);
+    document.body.appendChild(this.turnContainer);
+  }
 
   private _createMenu() {
     const menu = document.createElement('div');
-    menu.setAttribute('id', 'menu');
-    Object.assign(menu.style, this.styles.menu);
+    menu.classList.add('menu');
     document.body.appendChild(menu);
     this.menu = menu;
+  }
+
+  switchTurn(turn: string) {
+    const turnFrame = document.querySelector('.turn-frame');
+    gsap.to(turnFrame, { duration: 0.5, x: turn === 'white' ? 0 : 60 });
   }
 
   hideMenu() {
@@ -39,11 +54,11 @@ class UserInterfaceView implements IView {
    }
   }
 
-  createButton({ text, style, parent, className, callback }: any) {
+  createButton({ text, parent, classes, image, callback }: any) {
     const button = document.createElement('button');
+    image && (button.style.backgroundImage = `url(${image})`);
     button.textContent = text;
-    className && button.classList.add(className);
-    style && Object.assign(button.style, style);
+    classes && button.classList.add(...classes);
     parent.appendChild(button);
     button.addEventListener('click', callback);
   }

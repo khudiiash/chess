@@ -33,6 +33,8 @@ class CellView implements IView {
 
   highlight(color: number) {
     // @ts-ignore
+    this.mesh.material.color.setHex(0xdddddd);
+    // @ts-ignore
     this.mesh.material.emissive.set(color);
     // @ts-ignore
     this.mesh.material.emissiveIntensity = 1;
@@ -40,7 +42,7 @@ class CellView implements IView {
 
   dehighlight() {
     // @ts-ignore
-    this.mesh.material.emissive.set(this.defaultColor);
+    this.mesh.material.color.setHex(this.defaultColor);
     // @ts-ignore
     this.mesh.material.emissiveIntensity = 0;
   }

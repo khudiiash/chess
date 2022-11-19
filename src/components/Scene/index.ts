@@ -3,12 +3,19 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js' 
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import gsap from 'gsap';
+import pVertex from '@/shaders/particles/vertex.glsl';
+import pFragment from '@/shaders/particles/fragment.glsl'
 
 export class Scene {
   private _scene: THREE.Scene;
   private _camera: THREE.PerspectiveCamera;
   private _renderer: THREE.WebGLRenderer;
   private _controls: OrbitControls;
+
+
+  _uniforms = {
+    uTime: { value: 0 },
+  };
 
   lights: { ambient: THREE.AmbientLight; directional: THREE.DirectionalLight; };
   _loadingManager: THREE.LoadingManager;
@@ -23,10 +30,9 @@ export class Scene {
 
     this._loadModels();
     this._loadTextures();
-
     this._loadingManager.onLoad = () => onLoad({ models: this.models, textures: this.textures });
     this._scene = new THREE.Scene();
-    this._camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this._camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     this._renderer = new THREE.WebGLRenderer({ antialias: true });
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
@@ -35,7 +41,7 @@ export class Scene {
     this._camera.position.set(0, 5, 8);
     this._camera.lookAt(0, 0, 0);
     this._buildLights();
-    
+    this._createParticles();
     window.addEventListener('resize', this._onResize.bind(this));
     this._render();
     
@@ -91,7 +97,7 @@ export class Scene {
     this.add(ambient);
   }
 
-  add(mesh: THREE.Mesh | THREE.Light) {
+  add(mesh: THREE.Mesh | THREE.Light | THREE.Points) {
     this._scene.add(mesh);
   }
 
@@ -110,6 +116,7 @@ export class Scene {
   private _render() {
     this._renderer.render(this._scene, this._camera);
     this._controls.update();
+    this._uniforms.uTime.value = -window.performance.now() * 0.0004;
     requestAnimationFrame(this._render.bind(this));
   }
 
@@ -128,14 +135,47 @@ export class Scene {
     }
   }
 
+  _createParticles() {
+    const n = 2000;
+    const pGeometry = new THREE.BufferGeometry()
+    const pPositions = new Float32Array(n * 3)
+    const pTargets = new Float32Array(n * 3)
+
+    const aScales =  new Float32Array(n)
+    for (let i = 0; i < n * 3; i ++) {
+        pPositions[i] = (Math.random() - 0.5) * 50,
+        pTargets[i] = (Math.random() - 0.5) * 50,
+        aScales[i] = Math.random() + 0.5 * 10;
+    }
+
+    pGeometry.setAttribute('position', new THREE.BufferAttribute(pPositions, 3))
+    pGeometry.setAttribute('aScale', new THREE.BufferAttribute(aScales, 1))
+    pGeometry.setAttribute('aTarget', new THREE.BufferAttribute(pTargets, 3))
+
+
+    const pMaterial = new THREE.ShaderMaterial({
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        vertexColors: false,
+        vertexShader: pVertex,
+        fragmentShader: pFragment,
+        uniforms: {
+            ...this._uniforms,
+            uSize: {value: 1000},
+        }
+    })
+
+
+    const particles = new THREE.Points(pGeometry, pMaterial)
+    particles.name = 'particles'
+    this.add(particles)
+  }
+
   private _onResize() {
     this._camera.aspect = window.innerWidth / window.innerHeight;
     this._camera.updateProjectionMatrix();
     this._renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  private _traverse(callback: (child: THREE.Object3D) => void) {
-    return this._scene.traverse(callback);
   }
 
   get children() {

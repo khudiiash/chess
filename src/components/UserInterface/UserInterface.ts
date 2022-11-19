@@ -12,47 +12,72 @@ class UserInterface implements IComponent {
   constructor() {
     this.model = new UserInterfaceModel();
     this.view = new UserInterfaceView();
-
   }
 
   build() {
-    this.view.build({ styles: this.model.styles });
-    this.observer = new Observer();
+    this.view.build();
+    this.createObservers();
     this.createMenuButtons();
+    this.createTurns();
     this.createInGameUI();
+  }
+  createObservers() {
+    this.observer = new Observer();
+    const { turn, gameover } = this.observer.events;
+    this.observer.subscribe(turn, this.onTurn.bind(this));
+    this.observer.subscribe(gameover, this.onGameOver.bind(this));
+  }
+
+  onTurn(turn: string) {
+    this.view.switchTurn(turn);
+  }
+
+  onGameOver(data: any) {
+    console.log('game over', data);
   }
 
   createInGameUI() {
     this.view.createButton({
       text: 'Menu',
-      style: this.model.styles.openMenuButton,
       parent: document.body,
-      className: 'open-menu-button',
+      classes: ['open-menu-button'],
       callback: this.onMenuButton.bind(this)
     });
   }
 
   onMenuButton() {
-    this.view.menu.style.display === 'none' ? this.view.showMenu() : this.view.hideMenu();
+    this.view.menu.style.display === 'flex' ? this.view.hideMenu() : this.view.showMenu();
+  }
+
+  createTurns() {
+    this.view.createButton({
+      parent: this.view.turnContainer,
+      classes: ['turn', 'white'],
+      image: '/textures/ui/knight_white.png',
+    })
+
+    this.view.createButton({
+      parent: this.view.turnContainer,
+      classes: ['turn', 'black'],
+      image: '/textures/ui/knight_black.png',
+    })
   }
 
   createMenuButtons() {
 
     this.view.createButton({
       text: 'Continue',
-      style: this.model.styles.button,
       parent: this.view.menu,
-      className: 'menu-button',
+      classes: ['menu-button'],
       callback: this.onContinue.bind(this)
     });
 
     this.view.createButton({
       text: 'Restart',
-      style: this.model.styles.button,
       parent: this.view.menu,
-      className: 'menu-button',
+      classes: ['menu-button'],
       callback: this.onRestart.bind(this)
-    });
+    })
   }
 
   onContinue() {
