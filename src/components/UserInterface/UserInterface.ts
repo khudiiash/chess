@@ -46,7 +46,12 @@ class UserInterface implements IComponent {
   }
 
   onMenuButton() {
-    this.view.menu.style.display === 'flex' ? this.view.hideMenu() : this.view.showMenu();
+    const shouldClose = this.view.menu.style.display === 'flex';
+    if (shouldClose) {
+      this.view.hideMenu();
+    } else {
+       this.view.showMenu();
+    }
   }
 
   createTurns() {
@@ -81,7 +86,6 @@ class UserInterface implements IComponent {
   }
 
   onContinue() {
-    this.observer.emit(this.observer.events.continue);
     this.view.hideMenu();
   }
 

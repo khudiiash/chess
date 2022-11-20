@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Observer } from '@/components';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js' 
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
@@ -22,22 +23,28 @@ export class Scene {
   _modelLoader: GLTFLoader;
   models: { [key: string]: THREE.Mesh; } = {};
   textures: any;
+  isShadowUpdated: boolean;
+  observer: Observer;
 
   build(onLoad: Function) {
     this._loadingManager = new THREE.LoadingManager()
     this._modelLoader = new GLTFLoader(this._loadingManager)
     this._modelLoader.setDRACOLoader(new DRACOLoader().setDecoderPath('/draco/'))
-
+    
     this._loadModels();
     this._loadTextures();
+    this._createObservers();
+
     this._loadingManager.onLoad = () => onLoad({ models: this.models, textures: this.textures });
     this._scene = new THREE.Scene();
-    this._camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this._renderer = new THREE.WebGLRenderer({ antialias: true });
+    this._camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 500);
+    this._renderer = new THREE.WebGLRenderer({ antialias: true});
+    this._renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
     
-    this._controls = new OrbitControls( this._camera, this._renderer.domElement );
+    this._setupControls();
+
     this._camera.position.set(0, 5, 8);
     this._camera.lookAt(0, 0, 0);
     this._buildLights();
@@ -45,6 +52,28 @@ export class Scene {
     window.addEventListener('resize', this._onResize.bind(this));
     this._render();
     
+  }
+  private _createObservers() {
+    this.observer = new Observer();
+    const { openMenu, closeMenu } = this.observer.events;
+    this.observer.subscribe(openMenu, this._onOpenMenu.bind(this));
+    this.observer.subscribe(closeMenu, this._onCloseMenu.bind(this));
+  }
+
+  private _onOpenMenu() {
+    this._controls.autoRotate = true;
+  }
+
+  private _onCloseMenu() {
+    this._controls.autoRotate = false;
+  }
+  private _setupControls() {
+    this._controls = new OrbitControls( this._camera, this._renderer.domElement );
+    this._controls.enableDamping = true;
+    this._controls.dampingFactor = 0.1;
+    this._controls.maxDistance = 20;
+    this._controls.autoRotateSpeed = 0.5;
+    this._controls.enablePan = false;
   }
 
   private _loadModels() {
@@ -62,7 +91,7 @@ export class Scene {
       fine_wood: { ao: null, diffuse: null, normal: null }
     };
 
-    const types = ['displacement', 'normal', 'specular', 'ao', 'diffuse', 'roughness', 'metalness'];
+    const types = ['displacement', 'normal', 'specular', 'ao', 'diffuse', 'height', 'roughness', 'metalness'];
     const materials = ['fine_wood', 'marble'];
     materials.forEach((material) => {
       types.forEach((type) => {
@@ -81,14 +110,14 @@ export class Scene {
   }
 
   private _buildLights() {
-    const ambient = new THREE.AmbientLight(0x404040); // soft white light
+    const ambient = new THREE.AmbientLight(0x404040, 2); // soft white light
     const directional = new THREE.DirectionalLight(0xffffff, 1);
 
     this._renderer.shadowMap.enabled = true;
     this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     directional.castShadow = true;
-    directional.shadow.mapSize.width = 4096;  // default
-    directional.shadow.mapSize.height = 4096;
+    directional.shadow.mapSize.width = 2048;
+    directional.shadow.mapSize.height = 2048;
     directional.shadow.camera.near = 0;
     directional.shadow.camera.far = 500;
     directional.position.set(2, 8, -5);
@@ -102,11 +131,14 @@ export class Scene {
   }
 
   fadeMainLight() {
-    gsap.to(this.lights.directional, { intensity: 0.4, duration: 1 });
+    gsap.to(this.lights.directional, { intensity: 0.5, duration: 0.5 });
+    gsap.to(this.lights.ambient, { intensity: 1, duration: 0.5 });
+
   }
 
   restoreMainLight() {
-    gsap.to(this.lights.directional, { intensity: 1, duration: 1 });
+    gsap.to(this.lights.directional, { intensity: 1, duration: 0.5 });
+    gsap.to(this.lights.ambient, { intensity: 2, duration: 0.5 });
   }
 
   remove(mesh: THREE.Mesh) {  
@@ -115,6 +147,7 @@ export class Scene {
 
   private _render() {
     this._renderer.render(this._scene, this._camera);
+    
     this._controls.update();
     this._uniforms.uTime.value = -window.performance.now() * 0.0004;
     requestAnimationFrame(this._render.bind(this));

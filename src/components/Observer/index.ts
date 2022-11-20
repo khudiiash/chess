@@ -20,6 +20,8 @@ class Observer {
       restart: 'restart',
       continue: 'continue',
       turn: 'turn',
+      closeMenu: 'closeMenu',
+      openMenu: 'openMenu',
       gameover: 'gameover',
     }
   }

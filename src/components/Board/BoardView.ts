@@ -25,11 +25,18 @@ class BoardView implements IView {
         this.piecesFactory = new PieceFactory();
         
         const geometry = new THREE.BoxGeometry( 8, 0.1, 8 );
-        const material = new THREE.MeshStandardMaterial( { color: 0x993300, roughness: 0.1 } );
+        const material = new THREE.MeshStandardMaterial( { 
+            color: 0x993300, 
+            normalMap:  resources.textures.marble.normal,
+            aoMap: resources.textures.marble.ao,
+            bumpMap: resources.textures.marble.height,
+            map:  resources.textures.marble.diffuse,
+            roughness: 0.25
+        } );
         const board = new THREE.Mesh( geometry, material );
         board.receiveShadow = true;
         
-        this.spotLight = new THREE.SpotLight(0xffffff, 10, 4, Math.PI / 9, 1, 3);
+        this.spotLight = new THREE.SpotLight(0xffffff, 2, 4, Math.PI / 21, 0.25, 0);
         this.spotLight.visible = false;
 
         this.cellsContainer = new THREE.Object3D();
@@ -52,7 +59,7 @@ class BoardView implements IView {
         this.spotLight.visible = true;
         this.spotLight.target = piece;
         this.spotLight.position.copy(piece.position);
-        this.spotLight.position.y = 2;
+        this.spotLight.position.y = 3;
     }
 
     deselectPiece() {

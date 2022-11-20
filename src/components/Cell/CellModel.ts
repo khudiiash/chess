@@ -18,7 +18,7 @@ class CellModel implements IModel {
   constructor(row: number, col: number) {
     this.name =  `${String.fromCharCode(97 + col)}${row + 1}`;
     this.colors = {
-      default: (row + col) % 2 === 0 ? 0x333333 : 0xeeeeee,
+      default: (row + col) % 2 === 0 ? 0x333333 : 0xeeccaa,
       move: 0x2222ff,
       attack: 0xd35656,
     }

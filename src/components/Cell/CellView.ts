@@ -14,9 +14,11 @@ class CellView implements IView {
         color: config.color,
         normalMap:  config.resources.textures.fine_wood.normal,
         aoMap: config.resources.textures.fine_wood.ao,
+        bumpMap: config.resources.textures.fine_wood.height,
         map:  config.resources.textures.fine_wood.diffuse,
         metalness: 0.1,
-        roughness: 0.4
+        roughnessMap: config.resources.textures.fine_wood.roughness,
+        roughness: 0.5
       })
     );
     this.mesh.receiveShadow = true;
