@@ -88,7 +88,7 @@ export class Scene {
     
     this.textures = {
       marble: { ao: null, diffuse: null, roughness: null, metalness: null, normal: null },
-      fine_wood: { ao: null, diffuse: null, normal: null }
+      fine_wood: { ao: null, diffuse: null, normal: null, roughness: null, height: null },
     };
 
     const types = ['displacement', 'normal', 'specular', 'ao', 'diffuse', 'height', 'roughness', 'metalness'];

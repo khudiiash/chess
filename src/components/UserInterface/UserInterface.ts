@@ -21,11 +21,17 @@ class UserInterface implements IComponent {
     this.createTurns();
     this.createInGameUI();
   }
+
   createObservers() {
     this.observer = new Observer();
-    const { turn, gameover } = this.observer.events;
+    const { turn, gameover, check } = this.observer.events;
     this.observer.subscribe(turn, this.onTurn.bind(this));
     this.observer.subscribe(gameover, this.onGameOver.bind(this));
+    this.observer.subscribe(check, this.onCheck.bind(this));
+  }
+  
+  onCheck() {
+    this.view.showCheck();
   }
 
   onTurn(turn: string) {
@@ -33,7 +39,7 @@ class UserInterface implements IComponent {
   }
 
   onGameOver(data: any) {
-    console.log('game over', data);
+    this.view.showGameOver(data);
   }
 
   createInGameUI() {

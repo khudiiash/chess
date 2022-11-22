@@ -22,6 +22,7 @@ class Observer {
       turn: 'turn',
       closeMenu: 'closeMenu',
       openMenu: 'openMenu',
+      check: 'check',
       gameover: 'gameover',
     }
   }

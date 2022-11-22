@@ -17,7 +17,15 @@ class UserInterfaceView implements IView {
   build() {
     this._createMenu();
     this._createTurnContainer();
+    this._createCheckMessage();
   }
+
+  private _createCheckMessage() {
+    const checkMessage = document.createElement('div');
+    checkMessage.classList.add('check-message');
+    document.body.appendChild(checkMessage);
+  }
+  
  
   private _createTurnContainer() {
     this.turnContainer = document.createElement('div');
@@ -35,9 +43,28 @@ class UserInterfaceView implements IView {
     this.menu = menu;
   }
 
+  showCheck() {
+    const checkMessage = document.querySelector('.check-message') as HTMLDivElement;
+    if (!checkMessage) return;
+    checkMessage.classList.add('show');
+    checkMessage.innerText = 'CHECK!';
+    gsap.timeline()
+      .fromTo(checkMessage, { duration: 0.5, opacity: 0, y: 50 }, { duration: 0.5, opacity: 1, y: 0 })
+      .to(checkMessage, { duration: 0.5, opacity: 0, y: -50}, '+=1');
+
+  }
+
+  showGameOver(winner: string) {
+    const checkMessage = document.querySelector('.check-message') as HTMLDivElement;
+    checkMessage.classList.add('show');
+    checkMessage.innerText = `${winner} wins!`;
+    gsap.timeline()
+      .from(checkMessage, { duration: 0.5, opacity: 0, y: -50 })
+  }
+
   switchTurn(turn: string) {
     const turnFrame = document.querySelector('.turn-frame');
-    gsap.to(turnFrame, { duration: 0.5, x: turn === 'white' ? 0 : 60 });
+    gsap.to(turnFrame, { duration: 0.25, x: turn === 'white' ? 0 : 60 });
   }
 
   hideMenu() {

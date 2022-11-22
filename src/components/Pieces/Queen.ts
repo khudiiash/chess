@@ -1,6 +1,8 @@
 import { BasePiece, BasePieceModel, BasePieceView } from "@/components/Base";
 import { IPieceConstructorParams } from "@/interfaces/Piece";
-import { TMovesMap } from "@/types";
+import { TBoardMap, TMove, TMovesMap } from "@/types";
+import Bishop from "./Bishop";
+import Rook from "./Rook";
 
 
 
@@ -13,6 +15,34 @@ class Queen extends BasePiece {
     this.build();
   }
 
+  static get values() : number[][] {
+    return [
+      [ -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0],
+      [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+      [ -1.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+      [ -0.5,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+      [  0.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+      [ -1.0,  0.5,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+      [ -1.0,  0.0,  0.5,  0.0,  0.0,  0.0,  0.0, -1.0],
+      [ -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]
+    ]
+  }
+
+  static getValue(y: number, x: number, isWhite: boolean): number {
+    return Queen.values[y][x];
+  }
+
+  getMoves(board: TBoardMap): TMove[] {
+    return Queen.getMoves(board, this.position.row, this.position.col);
+  }
+
+  static getMoves(board: TMovesMap, row: number, col: number): TMove[] {
+    return [
+      ...Bishop.getMoves(board, row, col),
+      ...Rook.getMoves(board, row, col),
+    ];
+  }
+
 }
 
 class QueenModel extends BasePieceModel {
@@ -22,11 +52,6 @@ class QueenModel extends BasePieceModel {
     this.type = 'queen';
   }
 
-  get moves(): TMovesMap {
-    return [[8, -8], [8, 0], [8, 8],
-            [0, -8],          [0, 8],
-            [-8, -8], [-8, 0],[-8, 8]];
-  }
 }
 
 class QueenView extends BasePieceView {

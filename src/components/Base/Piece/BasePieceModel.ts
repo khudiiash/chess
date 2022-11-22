@@ -1,6 +1,17 @@
 import { Cell } from "@/components/Cell";
 import { IPieceConstructorParams, IPieceModelConstructorParams } from "@/interfaces/Piece";
-import { TSize, TPosition, TMovesMap } from "@/types";
+import { TSize, TPosition, TMovesMap, TMove, TBoardMap } from "@/types";
+import { Observer } from "@/components";
+
+interface State {
+  check: boolean;
+  id: string;
+  isSelected: boolean;
+  isAlive: boolean;
+  hasMoved: boolean;
+  position: TPosition;
+  startPosition: TPosition;
+}
 
 class BasePieceModel {
 
@@ -10,29 +21,26 @@ class BasePieceModel {
   color: number;
   team: string;
   type: string;
+  validMoves: {[key: string]: TMove[]};
 
-  state: {
-    id: string;
-    isSelected: boolean;
-    isAlive: boolean;
-    hasMoved: boolean;
-    position: TPosition;
-    startPosition: TPosition;
-    validMoves: TPosition[];
-  }
+  state: State;
+  history: any[];
+  observer: Observer;
 
   constructor({value, row, col}: IPieceConstructorParams) {
     this.type = 'base';
     this.value = value;
     this.team = value > 6 ? 'black' : 'white';
     this.color = value > 6 ? 0x333333 : 0xeeeeee;
-
+    this.history = [];
+    this.validMoves = {};
     this.state = {
       // generate random hex id
       id: Math.floor(Math.random() * 16777215).toString(16),
       isSelected: false,
       isAlive: true,
       hasMoved: false,
+      check: false,
       position: {
         row: row,
         col: col
@@ -40,8 +48,7 @@ class BasePieceModel {
       startPosition: {
         row: row,
         col: col
-      },
-      validMoves: []
+      }
     }
   }
 
@@ -51,31 +58,54 @@ class BasePieceModel {
     this.state.isAlive = true;
     this.state.position.col = this.state.startPosition.col;
     this.state.position.row = this.state.startPosition.row;
-    this.state.validMoves.length = 0;
   }
  
   kill() {
-    this.state.position.row = -1;
-    this.state.position.col = -1;
     this.state.isAlive = false;
+    this.history.push({ isAlive: false });
   }
 
-  set validMoves(moves: TPosition[]) {
-    this.state.validMoves.length = 0;
-    this.state.validMoves.push(...moves);
+  generateMoves() {
+    
   }
 
-  get validMoves(): TPosition[] {
-    return this.state.validMoves;
+  revive() {
+    this.state.isAlive = true;
   }
 
-  setPosition(position: TPosition) {
+  setPosition(position: TPosition, hasMoved?: boolean) {
+    const record: any = { 
+      move: [
+        { row: this.state.position.row, col: this.state.position.col },
+        { row: position.row, col: position.col }
+      ]
+    };
+
     this.state.position.row = position.row;
     this.state.position.col = position.col;
+    
+    if (!this.state.hasMoved && hasMoved) {
+      this.state.hasMoved = true;
+      record.hasMoved = true;
+    }
+    this.history.push(record);
+   
   }
 
-  setHasMoved(hasMoved: boolean) {
-    this.state.hasMoved = hasMoved;
+  undo() {
+    const lastAction = this.history.pop();
+    if (lastAction.move) {
+      this.state.position.row = lastAction.move[0].row;
+      this.state.position.col = lastAction.move[0].col;
+    }
+
+    if (lastAction.isAlive === false) {
+      this.state.isAlive = true;
+    }
+
+    if (lastAction.hasMoved) {
+      this.state.hasMoved = false;
+    }
   }
 
   get position(): TPosition {
@@ -102,10 +132,13 @@ class BasePieceModel {
     return !this.state.isAlive;
   }
 
-  get moves(): TMovesMap {
-    return  [ [1, -1],  [1, 0],  [1, 1],
-              [0, -1],           [0, 1],
-              [-1, -1], [-1, 0], [-1, 1]];
+
+  getMoves(board: TMovesMap, row: number, col: number): TMove[] { 
+    return [];
+  }
+
+  hashValidMoves(map: TBoardMap, moves: TMove[]) {
+    this.validMoves[JSON.stringify(map)] = moves;
   }
 
 }

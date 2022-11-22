@@ -1,23 +1,23 @@
 import * as THREE from 'three';
 import {InteractiveComponent} from '@/components/Base';
-import { outOfBoard } from '@/utils/math';
 import { TPosition } from '@/types/TPosition';
 
 import BasePieceModel from './BasePieceModel';
 import BasePieceView from './BasePieceView';
-import { Cell } from '@/components/Cell';
-import { TResources } from '@/types';
+import { TBoardMap, TMove, TPiece, TResources } from '@/types';
 
 class BasePiece extends InteractiveComponent {
+    [x: string]: any;
 
-    value: number;
     color: number;
     mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
     model: BasePieceModel;
     view: BasePieceView;
     validMoves: TPosition[];
     resources: TResources;
+    
 
+    
     build() {
       this.view.build({
         size: this.model.size,
@@ -29,18 +29,16 @@ class BasePiece extends InteractiveComponent {
       this.makeClickable();
     }
 
-    setValidMoves(moves: TPosition[]) {
-      this.model.validMoves = moves;
-    }
-    
-    getValidMoves() {
-      return this.model.validMoves;
-    }
-
     reset() {
       this.model.reset();
       this.view.reset();
-      this.view.setPosition(this.position);
+      this.view.move(this.model.position);
+    }
+
+    undo() {
+      this.model.undo();
+      this.view.setPosition(this.model.state.position);
+      if (this.isAlive && this.view.isDead) this.view.revive();
     }
    
     setPosition(position: TPosition) {
@@ -49,11 +47,10 @@ class BasePiece extends InteractiveComponent {
       this.view.setPosition(position);
     }
 
-    move(position: TPosition, instantly = false) {
+    async move(position: TPosition, instantly = false) {
       // set position with animation
-      this.model.setPosition(position);
-      this.model.setHasMoved(true);
-      instantly ? this.view.setPosition(position) : this.view.move(position);
+      this.model.setPosition(position, true);
+      instantly ? this.view.setPosition(position) : await this.view.move(position);
     }
 
     select() {
@@ -69,42 +66,17 @@ class BasePiece extends InteractiveComponent {
       this.view.kill(instantly);
     }
 
+    revive() {
+      this.model.revive();
+      this.view.revive();
+    }
+
     onClick(): void {
 
     }
 
-    getPossibleMoves(): TPosition[] | TPosition[][] {
-      const { row, col } = this.position;
-      const moves = this.model.moves;
-      const updateValue = (value: number, target: number) => {
-        if (value === target) return value;
-        return value > target ? value - 1 : value + 1;
-      }
-      const possibleMoves = moves.map(move => {
-        const options = [];
-        let r = 0;
-        let c = 0;
-        
-        if (['knight', 'pawn', 'king'].includes(this.model.type) && !(this.isPawn && !this.hasMoved)) {
-          r = row + move[0];
-          c = col + move[1];
-          return outOfBoard(r, c) ? [] : [{row: r, col: c}]
-        }
-
-        while (r !== move[0] || c !== move[1]) {
-          r = updateValue(r, move[0]);
-          c = updateValue(c, move[1]);
-          if (outOfBoard(row + r, col + c)) break;
-          options.push({row: row + r, col: col + c});
-        }   
-        return options;
-      });
-  
-      return possibleMoves.filter(move => move.length > 0);
-    }
-
-    canMoveTo({row, col}: TPosition) {
-      return this.model.validMoves.some(move => move.row === row && move.col === col);
+    canMoveTo(map: TBoardMap, {row, col}: TPosition) {
+      return this.getMoves(map).some(([, move]: TMove) => move.row === row && move.col === col);
     }
 
     get position() {
@@ -113,6 +85,14 @@ class BasePiece extends InteractiveComponent {
 
     get team() {
       return this.model.team;
+    }
+
+    get type() {
+      return this.model.type;
+    }
+
+    get value() {
+      return this.model.value;
     }
 
     get isKing() {
@@ -149,7 +129,6 @@ class BasePiece extends InteractiveComponent {
     get isDead() {
       return this.model.isDead;
     }
-
 
 }
 

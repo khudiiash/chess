@@ -22,6 +22,30 @@
   outline: none;
 };
 
+.check-message {
+  position: fixed;
+  display: none;
+  top: 30vh;
+  left: calc(50vw - 50px);
+  width: 100px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  color: #fff;
+  text-transform: capitalize;
+  font-weight: bold;
+  font-family: Arial;
+  text-shadow: 0 0 5px #000;
+  text-align: center;
+  user-select: none;
+}
+
+.show {
+  display: block;
+}
+
 .turn-frame {
   position: absolute;
   width: 48px;

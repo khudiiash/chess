@@ -29,7 +29,6 @@ class BoardView implements IView {
             color: 0x993300, 
             normalMap:  resources.textures.marble.normal,
             aoMap: resources.textures.marble.ao,
-            bumpMap: resources.textures.marble.height,
             map:  resources.textures.marble.diffuse,
             roughness: 0.25
         } );
@@ -50,8 +49,6 @@ class BoardView implements IView {
         this.mesh = board;
         this.piecesContainer.add(this.spotLight);
     }
-
-
 
     selectPiece(piece: THREE.Mesh) {
         // @ts-ignore

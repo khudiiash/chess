@@ -1,11 +1,9 @@
 import { IComponent } from "@/interfaces";
-import { TMove, TMoveOptions, TPiece,TPosition, TResources } from "@/types";
-import { inRange } from "@/utils/math";
-import { Cell, Observer } from "@/components";
-
+import { TMove, TPiece,TPosition, TResources } from "@/types";
+import { Cell, Observer, AI } from "@/components";
+import gsap from "gsap";
 import Model from "./BoardModel";
 import View from "./BoardView";
-import { areOpponentValues } from "@/utils/board";
 
 class Board implements IComponent {
     
@@ -16,6 +14,7 @@ class Board implements IComponent {
     whites: TPiece[];
     blacks: TPiece[];
     observer: Observer;
+    ai: AI;
 
     constructor() {
         this.model = new Model();
@@ -27,11 +26,14 @@ class Board implements IComponent {
     build(resources: TResources) : void {
         this.view.build(resources);
         this.view.buildCells(this.cells, resources);
-        this.view.buildPieces(this.model.startMap, this.pieces, resources);
-        this.reproduceHistory(this.model.state.history);
+        this.view.buildPieces(this.model.startBoard, this.pieces, resources);
+        this.whites = this.pieces.filter(piece => piece.team === 'white');
+        this.blacks = this.pieces.filter(piece => piece.team === 'black');
+        this.ai = new AI(this.model, this.blacks, this.whites);
         this._setObserver();
         this._setHandlers();
-
+        this.restore(this.model.getHistory());
+        this.model.generateMoves();
         this.observer.emit(this.observer.events.turn, this.model.state.turn);
     }
 
@@ -45,14 +47,14 @@ class Board implements IComponent {
         this.cells.flat().forEach(cell => cell.addHandler('click', this.onCellClick.bind(this)));
     }
 
-    reproduceHistory(history: TMove[]) {
-        history.forEach(move => {
-            this.makeMove(move, { instantly: true, shouldRecord: false });
+    restore(moves: TMove[]) {
+        moves.forEach(move => {
+            this.makeMove(move, true);
         });
     }
 
     getPieceOnPosition(position: TPosition) {
-        return this.pieces.find(piece => this.positionsMatch(piece.position, position));
+        return this.pieces.find(piece => piece.isAlive && this.model.samePositions(piece.position, position));
     }
 
     getCellOnPosition(position: TPosition) {
@@ -72,13 +74,13 @@ class Board implements IComponent {
     getSelectedPiece(): TPiece | null {
         const position = this.model.getSelectedPiecePosition();
         if (position.row === null) return null;
-        return this.pieces.find(piece => piece.isAlive && this.positionsMatch(piece.position, position));
+        return this.pieces.find(piece => piece.isAlive && this.model.samePositions(piece.position, position));
     }
     
     onPieceClick(piece: TPiece) {
         const selectedPiece = this.getSelectedPiece();
-        
-        if (this.areOpponents(selectedPiece, piece) && selectedPiece?.canMoveTo(piece.position)) {
+
+        if (this.areOpponents(selectedPiece, piece) && selectedPiece?.canMoveTo(this.board, piece.position)) {
            this.makeMove([selectedPiece.position, piece.position]);
            return;
         }
@@ -100,23 +102,46 @@ class Board implements IComponent {
     onCellClick(cell: Cell): void{
         const piece = this.getSelectedPiece();
         if (!piece) return;
-        if (this.positionsMatch(piece.position, cell.position)) return;
+        if (this.model.samePositions(piece.position, cell.position)) return;
 
-        piece.canMoveTo(cell.position) && this.makeMove([piece.position, cell.position]);
+        piece.canMoveTo(this.board, cell.position) && this.makeMove([piece.position, cell.position]);
         this.clearSelection();
     }
 
-    positionsMatch(pos1: TPosition, pos2: TPosition) {
-        return pos1.row === pos2.row && pos1.col === pos2.col;
-    }
-
-    makeMove([fromPos, toPos]: TMove, { instantly, shouldRecord }: TMoveOptions = { instantly: false, shouldRecord: true }) {
+    async makeMove([fromPos, toPos]: TMove, instantly = false) {
         const [from, to] = [{...fromPos}, {...toPos}];
-        shouldRecord && this.model.makeMove([from, to]);
-        this.getPieceOnPosition(to)?.kill(instantly);
-        this.getPieceOnPosition(from)?.move(to, instantly);
+        this.model.makeMove([from, to]);
+        if (!instantly) {
+            this.model.record([from, to]);
+            this.model.nextTurn();
+            this.model.save();
+            this.model.check();
+            this.model.generateMoves();
+        }
+
+        const piece = this.getPieceOnPosition(from);
+        const opponent = this.getPieceOnPosition(to);
+        opponent?.kill(instantly);
         this.clearSelection();
-        this.observer?.emit(this.observer.events.turn, this.model.state.turn);
+        instantly ? piece.setPosition(to) : await piece.move(to, instantly);
+
+
+        if (!instantly && !this.model.isGameOver() && this.model.turn === 'black') {
+            this.generateNextMove();
+        }
+        // if (checkMove) {
+        //     this.observer.emit(this.observer.events.check);
+        // }
+
+        // if (this.isCheckmate()) {
+        //     this.observer.emit(this.observer.events.checkmate, this.model.state.turn);
+        //     return;
+        // }
+
+        // if (this.model.turn === 'black') {
+        //     this.generateNextMove();
+        // }
+
     }
     
     clearSelection() {
@@ -127,70 +152,54 @@ class Board implements IComponent {
     }
 
     highlightPossibleMoves(piece: TPiece) {
-        const moves = this.getValidPositions(piece.getPossibleMoves());
-        const validMoves: TPosition[] = [];
-        this.cells.forEach(row => row.forEach(cell => cell.dehighlight()));
+        const moves = this.model.getPieceMoves(piece);
+        this.cells.flat().forEach(cell => cell.dehighlight());
         
-        moves.forEach((position: TPosition) => {
-            validMoves.push(position);
+        moves.forEach(([, position]: TMove) => {
             const cell = this.cells[position.row][position.col];
             const piece = this.getPieceOnPosition(position);
             cell.highlight(piece);
         });
-
-        piece.setValidMoves(validMoves);
     }
 
-    getValidPositions(positions: TPosition[] | TPosition[][]): TPosition[] {
-        const moves: TPosition[] = [];
-        for (const position of positions) {
-            if (Array.isArray(position)) {
-                for (const pos of position) {
-                    const res = this.checkPosition(pos);
-                    if (res.empty) {
-                        moves.push(pos);
-                    } 
-                    else if (res.opponent) {
-                        moves.push(pos);
-                        break;
-                    }
-                    else if (res.teammate) {
-                        break;
-                    }
-                }
-            }
-            else {
-                const res = this.checkPosition(position);
-                if (res.empty || res.opponent) {
-                    moves.push(position);
-                }
-            }
-        }
-
-        return moves;
+    async generateNextMove() {
+        await new Promise(res => gsap.delayedCall(1, res));
+        const [from, to] = this.ai.generateNextMove();
+        this.makeMove([from, to]);
     }
 
-    isTeamPiece(piece: TPiece) {
-        return piece.model.team === this.getSelectedPiece()?.model.team;
+    isOpponentOnPosition(piece: TPiece, position: TPosition) {
+        return this.model.areOpponentValues(piece.value, this.board[position.row][position.col]);
     }
 
-    isOpponentPiece(piece: TPiece) {
-        return this.getSelectedPiece() && (piece.model.team !== this.getSelectedPiece().model.team);
-    }
-
-    checkPosition(position: TPosition): { empty: boolean, teammate: boolean, opponent: boolean } {
-        const res = { empty: false, opponent: false, teammate: false}
-        const piece = this.getSelectedPiece();
-        const cellValue = this.model.state.map[position.row][position.col];
+    undo() {
+        const lastMove = this.model.undo();
+        const piece = this.getPieceOnPosition(lastMove[1]);
+        piece.undo();
         
-        res.opponent = cellValue && areOpponentValues(piece.model.value, cellValue);
-        res.teammate = cellValue && !areOpponentValues(piece.model.value, cellValue);
-        res.empty = cellValue === 0;
-        return res;
+        const opponent = this.pieces.find(piece => 
+            piece.isDead && 
+            this.doesPieceValueMatchMap(piece) &&
+            this.model.samePositions(piece.position, lastMove[1])
+        );
+
+        opponent && opponent.undo();
+    }
+
+    isGameOver() {
+        return this.model.isGameOver();
+    }
+
+    doesPieceValueMatchMap(piece: TPiece) {
+        return piece.value === this.board[piece.position.row][piece.position.col];
     }
 
     isValidPieceToMove(piece: TPiece) {
         return (piece.isWhite && this.model.isWhiteTurn) || (piece.isBlack && this.model.isBlackTurn);
+    }
+
+    get board() {
+        return this.model.board;
     }
 
 }

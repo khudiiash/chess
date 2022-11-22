@@ -1,3 +1,4 @@
+export { AI } from './AI';
 export { Board } from './Board';
 export { Scene } from './Scene';
 export { Game } from './Game';

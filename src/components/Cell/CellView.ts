@@ -18,7 +18,7 @@ class CellView implements IView {
         map:  config.resources.textures.fine_wood.diffuse,
         metalness: 0.1,
         roughnessMap: config.resources.textures.fine_wood.roughness,
-        roughness: 0.5
+        roughness: 1
       })
     );
     this.mesh.receiveShadow = true;

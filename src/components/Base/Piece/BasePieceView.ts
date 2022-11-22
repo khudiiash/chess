@@ -13,6 +13,7 @@ class BasePieceView {
   resources: TResources;
   defaultRotation: THREE.Euler;
   parent: any;
+  isDead: boolean = false;
 
   constructor({ resources }: IPieceConstructorParams) {
     this.resources = resources;
@@ -50,11 +51,14 @@ class BasePieceView {
   }
 
   kill(instantly = false) {
-    // @ts-ignore
+    this.isDead = true;
     this.parent = this.mesh.parent;
     this.mesh.userData.clickable = false;
     const onComplete = () => this.mesh.visible = false;
-    const duration = instantly ? 0 : 2;
+    if (instantly) {
+      return onComplete();
+    }
+    const duration = 0.5;
     const x = this.isWhite ? -4 : 4;
     const z = Math.PI / 2 * (this.isWhite ? 1 : -1);
   
@@ -63,11 +67,19 @@ class BasePieceView {
     gsap.to(this.mesh.material, { opacity: 0, duration, onComplete });
   }
 
+  revive() {
+    this.mesh.visible = true;
+    this.mesh.userData.clickable = true;
+    this.mesh.position.y = 0;
+    this.mesh.rotation.copy(this.defaultRotation);
+    // @ts-ignore
+    this.mesh.material.opacity = 1;
+  }
+
   reset() {
-    this.mesh.position.set(0, 0, 0);
+    this.mesh.position.y = 0;
     this.mesh.rotation.copy(this.defaultRotation);
     this.mesh.userData.clickable = true;
-
     // @ts-ignore
     this.mesh.material.opacity = 1;
     this.mesh.visible = true;

@@ -1,2 +1,2 @@
 import { TPosition } from "./TPosition";
-export type TMove = [TPosition, TPosition];
+export type TMove = [TPosition, TPosition, number?];
