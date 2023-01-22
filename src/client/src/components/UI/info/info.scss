@@ -1,0 +1,121 @@
+$text-color: rgba(137, 149, 165, 1);
+
+.info * {
+  user-select: none;
+  box-sizing: border-box;
+  color: $text-color;
+}
+
+.header {
+  width: 150px;
+  height: 40px;
+  background: linear-gradient(180deg, #ffffff 0%, #e5e5e5 100%);
+  position: fixed;
+  top: 0;
+  pointer-events: none;
+  left: calc(50vw - 75px);
+  border-radius: 0 0 15px 15px;
+}
+
+
+.side-header {
+  width: 200px;
+  height: 40px;
+  .message {
+    width: 100%;
+    top: 15px;
+    font-size: 10px;
+    margin-left: 0;
+    letter-spacing: 2px;
+  }
+}
+
+.message {
+  position: absolute;
+  top: 54px;
+  width: 110px;
+  margin: 0 auto;
+  height: fit-content;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-align: center;
+  margin-left: calc(50% - 55px);
+  text-transform: uppercase;
+  text-align: center;
+  user-select: none;
+  color: $text-color;
+  font-family: 'Roboto', sans-serif;
+
+}
+
+
+
+.white-header {
+  left: calc(50vw - 200px - 75px);
+  border-radius: 0 0 0 15px;
+}
+
+.black-header {
+  border-radius: 0 0 15px 0;
+  left: calc(50vw + 75px);
+}
+
+
+.turn-container {
+  width: 150px;
+  height: 70px;
+  margin: 0;
+  padding: 5px 25px;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+
+  .turn {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    user-select: none;
+    background-size: cover;
+    background-position: center;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+  };
+
+  .white-turn {
+    background-image: url(../../../../static/textures/ui/knight_white.png);
+  }
+
+  .black-turn {
+    background-image: url(../../../../static/textures/ui/knight_black.png);
+  }
+
+  .turn-frame {
+    position: absolute;
+    border-radius: 5px;
+    width: 40px;
+    height: 40px;
+    background-color: rgb(79, 79, 113);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .message {
+    top: 55px;
+    position: absolute;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+  }
+  
+
+}
+
+
+
+
+

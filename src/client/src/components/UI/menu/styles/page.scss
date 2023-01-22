@@ -1,0 +1,95 @@
+$text-color: rgba(137, 149, 165, 1);
+$text-color-passive: rgba(137, 149, 165, 0.5);
+$button-bg: rgba(255, 255, 255, 0.45);
+$button-bg-passive: rgba(255, 255, 255, 0.15);
+
+.page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  pointer-events: auto;
+
+  .text {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: $text-color;
+    margin-bottom: 20px;
+    &.title {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+  }
+  .page-navigation {
+    position: fixed;
+    right: 20px;
+    bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    .page-back-button, .page-close-button {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+      box-shadow: 0 0 40px 20px rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  .input.code {
+      color:rgba(255, 255, 255, 0.85);
+      &::placeholder {
+        color:rgba(255, 255, 255, 0.4);
+      }
+  }
+  
+  .button {
+    width: 160px;
+    padding: 0 6px;
+    height: 30px;
+    background-color: $button-bg;
+    border-radius: 5px;
+    margin: 6px;
+    letter-spacing: 1.5px;
+    font-size: 9px;
+    text-transform: uppercase;
+    transition: background-color 200ms, color 200ms;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    border: none;
+    color: $text-color;
+  
+    &.offline  {
+      pointer-events: none;
+      background-color: $button-bg-passive;
+      color: $text-color-passive;
+    }
+    
+    &.online {
+      pointer-events: all;
+      background-color: $button-bg;
+      color: $text-color;
+      &:hover {
+        color: goldenrod;
+      }
+    }
+
+    &.code {
+      user-select: all;
+      width: 360px;
+    }
+
+  }
+}
+
+
+
+
+
+
+
+

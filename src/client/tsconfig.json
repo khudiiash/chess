@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "baseUrl": "src",
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "module": "esnext",
+    "target": "ESNext",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "paths": {
+      "@/*": ["*"]
+   }
+  }
+}
