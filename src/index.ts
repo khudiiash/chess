@@ -6,8 +6,6 @@ import UserHandler from './handler';
 import cors from 'cors';
 
 const app = express();
-// @ts-ignore
-const port = `0.0.0.0:${$PORT}` || 3000;
 app.use(cors());
 
 const server = http.createServer(app);
@@ -21,11 +19,14 @@ app.get('*', (req, res) => {
 
 const run = async() => {
     if (process.env.NODE_ENV === 'production') {
+        // @ts-ignore
+        const port = `0.0.0.0:${process.env.PORT}`;
         server.listen(port, () => {
             console.log(`Production server is up on port ${port}`);
         });
     } else {
         const ngrok = require('ngrok');
+        const port = 3000;
         const url = await ngrok.connect(port);
         server.listen(port, () => {
             console.log(`Development server is up on port ${port} and ngrok url is ${url}`);
