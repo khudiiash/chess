@@ -34,6 +34,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         // @ts-ignore
         const port = `0.0.0.0:${process.env.PORT}`;
         app.use(express_1.default.static(paths.client.prod));
+        console.log(paths.client.prod);
         app.get('*', (req, res) => {
             res.sendFile(path_1.default.join(paths.client.prod, 'index.html'));
         });
