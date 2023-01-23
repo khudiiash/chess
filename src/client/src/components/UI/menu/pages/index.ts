@@ -5,4 +5,6 @@ export { SettingsPage } from './settings';
 export { DifficultyPage } from './difficulty';
 export { PausePage } from './pause';
 export { GameOverPage } from './gameover';
+export { OpponentRestartPage } from './opponent_restart';
+export { OpponentLeftPage } from './opponent_left';
 export { Page } from './page';

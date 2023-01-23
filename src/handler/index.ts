@@ -17,16 +17,33 @@ class UserHandler {
 
   setupConnection() {
     this.io.on(events.connection, (socket: Socket) => {
-      const user = new User(socket, this.users.length);
-      console.log('user connected', user.id)
-      this.users.push(user);
-      let game = this.createGame(user);
+      const userID = socket.handshake.query.userID;
+      let isNew = true;
+      let user = this.users.find((user) => user.id === userID);
 
-      socket.emit(events.gameCreated, game.id);
-      
+      if (user) {
+        isNew = false;
+        user.updateSocket(socket);
+        const game = this.findGameByUser(user);
+        if (game) {
+          game.setEvents();
+          user.socket.emit(events.joinedGame, game.joinData);
+        }
+
+      } else{
+        user = new User(socket, this.users.length);
+        this.users.push(user);
+      }
+
+
+        
       socket.on(events.disconnected, this.onDisconnected.bind(this, user));
       socket.on(events.setUserName, (name) => this.setName(socket, name));
       socket.on(events.join, (data) => this.join(data));
+      if (!isNew) return;
+
+      let game = this.createGame(user);
+      socket.emit(events.gameCreated, game.id);
 
       socket.broadcast.emit(events.playerConnected, {
         id: socket.id,
@@ -36,51 +53,42 @@ class UserHandler {
   }
 
   onDisconnected(user) {
-    const socket = user.socket;
-    this.users = this.users.filter((user) => user.id !== socket.id);
-    const game = this.findGameByUser(user);
-    
-    if (!game) return;
-    
-    if (game.host.id === user.id && game.guest) {
-      game.guest.socket.emit(events.hostLeft);
-      game.guest.socket.disconnect();
-      game.host = game.guest;
-      game.guest = null;
-    } else {
-      game.host.socket.emit(events.guestLeft);
-      game.host.socket.disconnect();
-      game.guest = null;
-    }
-  }
 
-  findUserBySocket(socket) {
-   // TODO: find user by socket
+
   }
 
   findGameByUser(user: User) {
-    // TODO: find game by user
-    return this.games.find((game) => game.id === user.gameId);
+    return this.games.find((game) => user.gameID === game.id  && game.active);
   }
 
   join(data) {
-    const { gameId, userId } = data;
-    const game = this.games.find((game) => game.id === gameId);
-    const guest = this.users.find((user) => user.id === userId);
+    const { gameID, userID } = data;
+    const game = this.games.find((game) => game.id === gameID);
+    const joiner = this.users.find((user) => user.id === userID);
 
-    guest.setSide('black');
     if (!game) {
       console.log('game not found');
-      guest.socket.emit(events.gameNotFound);
+      joiner.socket.emit(events.gameNotFound);
       return;
     }
-    game.addPlayer(guest);
+
+    if (game.active) {
+      return;
+    }
+    
+    if (!game.active) {
+      joiner.setSide(game.host.side === 'white' ? 'black' : 'white');
+      game.addPlayer(joiner);
+    }
+
+ 
   }
 
   
 
   setName(socket: Socket, name: string) {
-    const user = this.users.find((user) => user.id === socket.id);
+    const user = this.users.find((user) => user.socket.id === socket.id);
+    if (!user) return;
     user.setName(name);
     socket.broadcast.emit(events.setUserName, { id: socket.id, name });
 

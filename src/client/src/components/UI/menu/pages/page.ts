@@ -70,6 +70,10 @@ export class Page {
       this.observer.emit(events.back);
     }
 
+    exit() {
+      this.observer.emit(events.exit);
+    }
+
     addBackButton() {
       const backButton = button('←', this.back, ['page-back-button']);
       this.nav.appendChild(backButton);

@@ -1,16 +1,19 @@
+import { Socket } from "socket.io";
+import { events } from "../../globals";
+
 class User {
-  socket: any;
+  socket: Socket;
   index: string;
   id: string;
   name: string;
   side: 'white' | 'black';
-  gameId: any;
+  gameID: string;
   
-  constructor(socket, index) {
+  constructor(socket: Socket, index) {
     this.socket = socket;
     this.index = index;
-    this.id = socket.id;
-    this.side = 'white';
+    this.id = socket.handshake.query.userID as string;
+    this.side = socket.handshake.query.side as 'white' | 'black';
     this.name = `Player ${index + 1}`;
   }
 
@@ -23,7 +26,25 @@ class User {
   }
 
   setGameId(gameId) {
-    this.gameId = gameId;
+    this.gameID = gameId;
+  }
+
+  updateSocket(socket: Socket) {
+    this.socket.eventNames().forEach((event: string) => {
+      const callbacks = this.socket.listeners(event);
+      callbacks.forEach((callback) => {
+        socket.on(event, callback);
+      });
+    });
+    this.socket.removeAllListeners();
+    this.socket = socket;
+  }
+
+  removeListeners(names: events[]) {
+    names.forEach((event) => {
+      console.log('removing listener', event)
+      this.socket.removeAllListeners(event);
+    });
   }
 }
 

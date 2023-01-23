@@ -250,7 +250,7 @@ class Board implements IComponent {
     }
 
     onPieceClick(piece: Piece) {
-        if (game.online && this.model.side === this.model.sides.opponent) return;
+        if (this.model.side === this.model.sides.opponent) return;
         const previous = this.model.getSelected();
 
         if (previous && piece.side !== previous.side) {

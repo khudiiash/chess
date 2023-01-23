@@ -8,50 +8,41 @@ class Game {
         this.id = (0, uuid_1.v4)().toUpperCase();
         this.host = host;
         this.host.setGameId(this.id);
-        this.guest = null;
-        this.players = [this.host, this.guest];
-        this.host.socket.on(globals_1.events.move, this.onHostMove.bind(this));
-        this.host.socket.on(globals_1.events.leave, this.onHostLeave.bind(this));
     }
-    addPlayer(user) {
+    addPlayer(guest) {
         if (this.guest)
             return;
-        console.log('adding guest');
-        this.guest = user;
-        this.guest.socket.on(globals_1.events.move, this.onGuestMove.bind(this));
-        this.guest.socket.on(globals_1.events.leave, this.onGuestLeave.bind(this));
-        user.socket.emit(globals_1.events.joinedGame, this.joinData);
+        this.active = true;
+        this.guest = guest;
+        this.guest.setGameId(this.id);
+        this.setEvents();
+        this.guest.socket.emit(globals_1.events.joinedGame, this.joinData);
         this.host.socket.emit(globals_1.events.guestJoined, this.joinData);
+    }
+    setEvents() {
+        this.host.removeListeners(this.events);
+        this.guest.removeListeners(this.events);
+        this.players.forEach(player => {
+            const opponent = this.players.find(p => p !== player);
+            player.socket.on(globals_1.events.move, data => opponent.socket.emit(globals_1.events.move, data));
+            player.socket.on(globals_1.events.leave, () => opponent.socket.emit(globals_1.events.opponentLeft));
+            player.socket.on(globals_1.events.restartRequest, () => opponent.socket.emit(globals_1.events.restartRequested));
+            player.socket.on(globals_1.events.restartAccept, () => opponent.socket.emit(globals_1.events.restartAccepted));
+            player.socket.on(globals_1.events.restartRefuse, () => opponent.socket.emit(globals_1.events.restartRefused));
+        });
+    }
+    get events() {
+        return [globals_1.events.move, globals_1.events.leave, globals_1.events.opponentLeft, globals_1.events.restartRequest, globals_1.events.restartRequested, globals_1.events.restartAccept, globals_1.events.restartAccepted, globals_1.events.restartRefuse, globals_1.events.restartRefused];
     }
     get joinData() {
         return {
-            host: { name: this.host.name, side: this.host.side },
-            guest: { name: this.guest.name, side: this.guest.side },
+            host: { name: this.host.name, side: this.host.side, id: this.host.id },
+            guest: { name: this.guest.name, side: this.guest.side, id: this.guest.id },
             gameID: this.id
         };
     }
-    onHostMove(move) {
-        console.log('host move', move);
-        this.moves.push(move);
-        if (!this.guest) {
-            console.error('no guest found', this.id);
-            return;
-        }
-        ;
-        this.guest.socket.emit(globals_1.events.move, move);
-    }
-    onGuestMove(move) {
-        console.log('guest move', move);
-        this.moves.push(move);
-        this.host.socket.emit(globals_1.events.move, move);
-    }
-    onHostLeave() {
-        console.log('host left');
-        this.guest.socket.emit(globals_1.events.hostLeft);
-    }
-    onGuestLeave() {
-        console.log('guest left');
-        this.host.socket.emit(globals_1.events.guestLeft);
+    get players() {
+        return [this.host, this.guest];
     }
 }
 exports.default = Game;

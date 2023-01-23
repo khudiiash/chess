@@ -33,7 +33,14 @@ export enum events {
   join = 'join',
   invite = 'invite',
   leave = 'leave',
+  opponentLeft = 'opponent left',
   gameID = 'game-id',
+  restartRequest = 'restart request',
+  restartRequested = 'restart requested',
+  restartRefuse = 'restart refuse',
+  restartAccept = 'restart accept',
+  restartRefused = 'restart refused',
+  restartAccepted = 'restart accepted',
 
   // user
   setUserName = 'name',

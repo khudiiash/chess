@@ -34,7 +34,14 @@ var events;
     events["join"] = "join";
     events["invite"] = "invite";
     events["leave"] = "leave";
+    events["opponentLeft"] = "opponent left";
     events["gameID"] = "game-id";
+    events["restartRequest"] = "restart request";
+    events["restartRequested"] = "restart requested";
+    events["restartRefuse"] = "restart refuse";
+    events["restartAccept"] = "restart accept";
+    events["restartRefused"] = "restart refused";
+    events["restartAccepted"] = "restart accepted";
     // user
     events["setUserName"] = "name";
     events["setUserSide"] = "side";

@@ -4,8 +4,8 @@ class User {
     constructor(socket, index) {
         this.socket = socket;
         this.index = index;
-        this.id = socket.id;
-        this.side = 'white';
+        this.id = socket.handshake.query.userID;
+        this.side = socket.handshake.query.side;
         this.name = `Player ${index + 1}`;
     }
     setSide(side) {
@@ -15,7 +15,23 @@ class User {
         this.name = name;
     }
     setGameId(gameId) {
-        this.gameId = gameId;
+        this.gameID = gameId;
+    }
+    updateSocket(socket) {
+        this.socket.eventNames().forEach((event) => {
+            const callbacks = this.socket.listeners(event);
+            callbacks.forEach((callback) => {
+                socket.on(event, callback);
+            });
+        });
+        this.socket.removeAllListeners();
+        this.socket = socket;
+    }
+    removeListeners(names) {
+        names.forEach((event) => {
+            console.log('removing listener', event);
+            this.socket.removeAllListeners(event);
+        });
     }
 }
 exports.default = User;

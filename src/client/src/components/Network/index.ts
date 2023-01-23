@@ -2,6 +2,7 @@ import { Move } from "@/types";
 import { io } from "socket.io-client";
 import { Observer } from "@/components";
 import { events } from "@/../../globals";
+import { v4 as uuidv4 } from 'uuid';
 
 interface MoveIO {
     move: Move,
@@ -26,10 +27,9 @@ export class Network {
             Network.instance = this;
         }
         this.serverUrl = process.env.NODE_ENV === 'development' ? process.env.DEV_SERVER : '';
-        this._init();
     }
 
-    private _init() {
+    public init() {
         this._initSocket();
         this._setObservers();
     }
@@ -37,10 +37,21 @@ export class Network {
     private _setObservers() {
         this.observer = new Observer();
         this.observer.on(events.join, this.join);
+        [
+          events.restartRequest,
+          events.restartAccept,
+          events.restartRefuse,
+          events.leave
+        ].forEach(event => this.observer.on(event, () => this.socket.emit(event)));
     }
 
     private _initSocket() {
-      this.socket = io(this.serverUrl);
+      let userID = localStorage.getItem('userID');
+      if (!userID) {
+        userID = uuidv4().toUpperCase();
+        localStorage.setItem('userID', userID);
+      }
+      this.socket = io(this.serverUrl, { query: { userID, side: game.model.sides.user } });
       this.socket.on('connect_error', (err: any) => {
        console.warn(err);
        this.observer.emit(events.disconnected);
@@ -49,21 +60,18 @@ export class Network {
       this.socket.on('connect', () => {
         this.observer.emit(events.connected);
       });
-      this.socket.on(events.gameCreated, this.onGameCreated);
-      this.socket.on(events.joinedGame, this.onJoinGame);
-      this.socket.on(events.guestJoined, this.onGuestJoined);
-    }
 
-    public onGuestJoined(data: any) {
-        this.observer.emit(events.guestJoined, data);
-    }
-
-    public onJoinGame(data: any) {
-        this.observer.emit(events.joinedGame, data);
-    }
-
-    public onGameCreated(data: any) {
-        this.observer.emit(events.gameID, data);
+      [
+        events.gameCreated, 
+        events.joinedGame, 
+        events.guestJoined, 
+        events.restartRequested, 
+        events.restartAccepted, 
+        events.restartRefused,
+        events.opponentLeft
+      ].forEach(event => {
+        this.socket.on(event, (data: any) => this.observer.emit(event, data))
+      });
     }
 
     public emit(event: string, data: any) {
@@ -79,12 +87,9 @@ export class Network {
         this.socket.on(event, callback);
     }
 
-    public leave() {
-        this.socket.emit(events.leave);
-    }
-
-    public join(gameId: string) {
-        this.socket.emit(events.join, {gameId, userId: this.socket.id});
+    public join(gameID: string) {
+        const userID = localStorage.getItem('userID');
+        this.socket.emit(events.join, {gameID, userID });
     }
 
     public setUserName(name: string) {

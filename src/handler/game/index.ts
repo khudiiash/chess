@@ -9,61 +9,53 @@ class Game {
   id: string;
   host: User;
   guest: User;
-  players: [User, User];
   moves: Move[] = [];
+  active
 
   constructor(host: User) {
     this.id = uuidv4().toUpperCase();
     this.host = host;
     this.host.setGameId(this.id);
-    this.guest = null;
-    this.players = [this.host, this.guest];
-    this.host.socket.on(events.move, this.onHostMove.bind(this));
-    this.host.socket.on(events.leave, this.onHostLeave.bind(this));
   }
 
-  addPlayer(user) {
+  addPlayer(guest: User) {
     if (this.guest) return;
-    console.log('adding guest')
-    this.guest = user;
-    this.guest.socket.on(events.move, this.onGuestMove.bind(this));
-    this.guest.socket.on(events.leave, this.onGuestLeave.bind(this));
-    user.socket.emit(events.joinedGame, this.joinData);
+    this.active = true;
+    this.guest = guest;
+    this.guest.setGameId(this.id);
+    this.setEvents();
+    this.guest.socket.emit(events.joinedGame, this.joinData);
     this.host.socket.emit(events.guestJoined, this.joinData);
+  }
+
+  setEvents() {
+    this.host.removeListeners(this.events);
+    this.guest.removeListeners(this.events);
+    
+    this.players.forEach(player => {
+      const opponent = this.players.find(p => p !== player);
+      player.socket.on(events.move,           data => opponent.socket.emit(events.move, data));
+      player.socket.on(events.leave,          () => opponent.socket.emit(events.opponentLeft));
+      player.socket.on(events.restartRequest, () => opponent.socket.emit(events.restartRequested));
+      player.socket.on(events.restartAccept,  () => opponent.socket.emit(events.restartAccepted));
+      player.socket.on(events.restartRefuse,  () => opponent.socket.emit(events.restartRefused));
+    });
+  }
+
+  get events() {
+    return [events.move, events.leave, events.opponentLeft, events.restartRequest, events.restartRequested, events.restartAccept, events.restartAccepted, events.restartRefuse, events.restartRefused]
   }
 
   get joinData() {
     return { 
-      host: { name: this.host.name, side: this.host.side }, 
-      guest: { name: this.guest.name, side: this.guest.side }, 
+      host: { name: this.host.name, side: this.host.side, id: this.host.id }, 
+      guest: { name: this.guest.name, side: this.guest.side, id: this.guest.id }, 
       gameID: this.id 
     };
   }
 
-  onHostMove(move: Move) {
-    console.log('host move', move)
-    this.moves.push(move)
-    if (!this.guest) {
-      console.error('no guest found', this.id)
-      return;
-    };
-    this.guest.socket.emit(events.move, move);
-  }
-
-  onGuestMove(move) {
-    console.log('guest move',move)
-    this.moves.push(move)
-    this.host.socket.emit(events.move, move);
-  }
-
-  onHostLeave() {
-    console.log('host left')
-    this.guest.socket.emit(events.hostLeft);
-  }
-
-  onGuestLeave() {
-    console.log('guest left')
-    this.host.socket.emit(events.guestLeft);
+  get players(): User[] {
+    return [this.host, this.guest];
   }
 }
 

@@ -98,16 +98,16 @@ class Game {
 
   exit() {
     this.setPlaying(false);
-    this.online && this.network.leave();
     this.clearLocalStorage();
   }
 
 
   onJoinGame(data: any) {
+    const userID = localStorage.getItem('userID');
     this.setGameID(data.gameID);
     this.setMode('online');
     this.network.on(events.move, this.board.onNetworkMove);
-    this.setUserSide(data.guest.side);
+    this.setUserSide(data.host.id === userID ? data.host.side : data.guest.side);
   }
 
   setPlaying(playing: boolean) {
@@ -179,8 +179,12 @@ class Game {
     this.scene.add(this.board.view.mesh);
     this.scene.add(this.weights.view.mesh);
     this.scene.startRendering();
+    this.network.init();
     this.handleClick();
     this.observer.emit(events.loaded);
+
+
+   
 
     if (this.board.model.isRestore) {
       this.setPlaying(true);

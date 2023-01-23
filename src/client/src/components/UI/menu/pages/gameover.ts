@@ -33,11 +33,7 @@ export class GameOverPage extends Page {
   }
 
 
-  exit() {
-    this.observer.emit(events.exit);
-    this.goto('main');
-  }
-
+  
   restart() {
     this.observer.emit(events.restart);
   }

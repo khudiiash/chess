@@ -14,7 +14,7 @@ export class PausePage extends Page {
   get structure() {
     return [
       text('Pause', ['title']),
-      button('Continue', this.continue),
+      button('Continue', this.close),
       button('Restart', this.restart),
       button('Settings', () => this.goto('settings')),
       button('Exit', this.exit),
@@ -26,16 +26,17 @@ export class PausePage extends Page {
   }
 
   exit() {
+    game.online && this.observer.emit(events.leave);
     this.observer.emit(events.exit);
     this.goto('main');
   }
 
-  continue() {
-    this.observer.emit(events.resume);
-  }
-
   restart() {
-    this.observer.emit(events.restart);
+    if (game.online) {
+      this.observer.emit(events.restartRequest);
+    } else {
+      this.observer.emit(events.restart);
+    }
   }
 
 

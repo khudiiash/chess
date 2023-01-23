@@ -12,7 +12,11 @@ export class InvitePage extends Page {
     build(): void {
       super.build();
       this.addBackButton();
-      this.observer.on(events.guestJoined, this.startGameWithMode.bind(this, 'online'));
+    }
+
+    createObservers(): void {
+      this.observer.on(events.guestJoined, () => this.startGameWithMode('online'));
+      this.observer.on(events.gameCreated, this.setGameId);
     }
 
     get name() {
@@ -26,13 +30,12 @@ export class InvitePage extends Page {
       ]
     }
 
-    copyCode() {
-      navigator.clipboard.writeText(game.id);
+    setGameId(id: string) {
+      this.code = id;
+      (this.dom.querySelector('.code') as HTMLElement).innerText = id;
     }
 
-    async show() {
-      const button = this.dom.querySelector('.code') as HTMLElement;
-      button.innerText = game.id;
-      return super.show();
+    copyCode() {
+      navigator.clipboard.writeText(this.code);
     }
 }
