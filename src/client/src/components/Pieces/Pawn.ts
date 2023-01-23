@@ -1,7 +1,5 @@
 import { Piece, PieceModel, PieceView } from "@/components/Base";
-import { IPieceConstructorParams, IPieceViewBuildConfig } from "@/interfaces/Piece";
-import { TBoardMap, Move } from "@/types";
-import { inBoard, isAttack, isTeam, reverseArray } from "@/utils";
+import { IPieceConstructorParams } from "@/interfaces/Piece";
 
 class Pawn extends Piece {
 

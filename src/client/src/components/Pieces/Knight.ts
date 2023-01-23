@@ -1,9 +1,8 @@
-import { TBoardMap, Move } from "@/types";
 import { Piece, PieceModel, PieceView } from "@/components/Base";
 import { IPieceConstructorParams } from "@/interfaces/Piece";
-import { inBoard, isTeam } from "@/utils";
 import { Cell } from "../Cell";
 import gsap from "gsap";
+
 class Knight extends Piece {
 
   constructor(params: IPieceConstructorParams) {  

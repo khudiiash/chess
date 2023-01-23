@@ -1,7 +1,7 @@
-import { TSize } from '@/types';
+import { Size } from '@/types';
 
 export interface IPieceViewBuildConfig {
-    size: TSize, 
+    size: Size, 
     color: number, 
     side: string, 
     type: string,

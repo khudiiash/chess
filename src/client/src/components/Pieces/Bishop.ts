@@ -1,7 +1,6 @@
-import { TBoardMap, Move, TMovesMap } from "@/types";
 import { Piece, PieceModel, PieceView } from "@/components/Base";
 import { IPieceConstructorParams } from "@/interfaces/Piece";
-import { isTeam, isAttack, inBoard, reverseArray } from "@/utils";
+
 class Bishop extends Piece {
 
   constructor(params: IPieceConstructorParams) {  

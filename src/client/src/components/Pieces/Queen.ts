@@ -1,10 +1,5 @@
 import { Piece, PieceModel, PieceView } from "@/components/Base";
 import { IPieceConstructorParams } from "@/interfaces/Piece";
-import { TBoardMap, Move, TMovesMap } from "@/types";
-import Bishop from "./Bishop";
-import Rook from "./Rook";
-
-
 
 class Queen extends Piece {
 
