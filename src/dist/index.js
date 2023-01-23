@@ -38,6 +38,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         app.get('*', (req, res) => {
             res.sendFile(path_1.default.join(paths.client.prod, 'index.html'));
         });
+        
         server.listen(port, () => {
             console.log(`Production server is up on port ${port}`);
         });
