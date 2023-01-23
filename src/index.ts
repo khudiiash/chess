@@ -21,7 +21,7 @@ const paths = {
 const run = async() => {
     if (process.env.NODE_ENV === 'production') {
         // @ts-ignore
-        const port = `0.0.0.0:${process.env.PORT}`;
+        const port = `0.0.0.0:$${process.env.PORT}`;
         app.use(express.static(paths.client.prod));
 
         app.get('*', (req, res) => {
