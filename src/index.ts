@@ -6,7 +6,8 @@ import UserHandler from './handler';
 import cors from 'cors';
 
 const app = express();
-const port = process.env.PORT || 3000;
+// @ts-ignore
+const port = `0.0.0.0:${$PORT}` || 3000;
 app.use(cors());
 
 const server = http.createServer(app);
