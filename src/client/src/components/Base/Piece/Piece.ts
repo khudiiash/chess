@@ -3,7 +3,7 @@ import {InteractiveComponent} from '@/components/Base';
 
 import PieceModel from './PieceModel';
 import PieceView from './PieceView';
-import { BoardMap, Move, Position, Resources, Square } from '@/types';
+import { Move, Position, Resources, Square } from '@/types';
 
 class Piece extends InteractiveComponent {
 

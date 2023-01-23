@@ -12,13 +12,12 @@ const PATHS = {
 module.exports = {
   entry: './src/index.ts',
   mode: 'development',
-  output:{
-      filename: 'bundle.[contenthash].js',
-      path: path.resolve(__dirname, './dist')
-  },
   devtool: 'source-map',
-
   devtool: 'inline-source-map',
+  output:{
+    filename: 'bundle.[contenthash].js',
+    path: path.resolve(__dirname, './dist')
+  },
   module: {
     rules: [
       // TS
