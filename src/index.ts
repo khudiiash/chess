@@ -20,7 +20,7 @@ const paths = {
 
 const run = async() => {
     if (process.env.NODE_ENV === 'production') {
-        const port = '0.0.0.0:$' + process.env.PORT;
+        const port = process.env.PORT;
         app.use(express.static(paths.client.prod));
         app.get('*', (req, res) => {
             res.sendFile(path.join(paths.client.prod, 'index.html'));

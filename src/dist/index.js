@@ -31,7 +31,7 @@ const paths = {
 };
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     if (process.env.NODE_ENV === 'production') {
-        const port = '0.0.0.0:$' + process.env.PORT;
+        const port = process.env.PORT;
         app.use(express_1.default.static(paths.client.prod));
         app.get('*', (req, res) => {
             res.sendFile(path_1.default.join(paths.client.prod, 'index.html'));
