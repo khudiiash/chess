@@ -21,7 +21,8 @@ var events;
     events["guestLeft"] = "guest left";
     events["joinedGame"] = "joined game";
     events["guestJoined"] = "guest joined";
-    events["gameCreated"] = "game created";
+    events["ownGameID"] = "own game id";
+    events["activeGameID"] = "active game id";
     events["gameNotFound"] = "game not found";
     // socket (server)
     events["connection"] = "connection";

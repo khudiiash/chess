@@ -11,11 +11,17 @@ class User {
     setSide(side) {
         this.side = side;
     }
+    setGame(game) {
+        this.game = game;
+    }
     setName(name) {
         this.name = name;
     }
-    setGameId(gameId) {
-        this.gameID = gameId;
+    setActiveGame(game) {
+        this.activeGame = game;
+    }
+    setOpponent(opponent) {
+        this.opponent = opponent;
     }
     updateSocket(socket) {
         this.socket.eventNames().forEach((event) => {
@@ -24,12 +30,12 @@ class User {
                 socket.on(event, callback);
             });
         });
-        this.socket.removeAllListeners();
+        this.socket.disconnect();
+        delete this.socket;
         this.socket = socket;
     }
     removeListeners(names) {
         names.forEach((event) => {
-            console.log('removing listener', event);
             this.socket.removeAllListeners(event);
         });
     }

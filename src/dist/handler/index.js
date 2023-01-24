@@ -16,40 +16,30 @@ class UserHandler {
     setupConnection() {
         this.io.on(globals_1.events.connection, (socket) => {
             const userID = socket.handshake.query.userID;
-            let isNew = true;
             let user = this.users.find((user) => user.id === userID);
             if (user) {
-                isNew = false;
+                console.log('user found');
                 user.updateSocket(socket);
-                const game = this.findGameByUser(user);
-                if (game) {
-                    game.setEvents();
-                    user.socket.emit(globals_1.events.joinedGame, game.joinData);
+                if (user.activeGame) {
+                    user.socket.emit(globals_1.events.ownGameID, user.game.id);
+                    user.socket.emit(globals_1.events.joinedGame, user.activeGame.joinData);
+                }
+                else if (user.game) {
+                    user.socket.emit(globals_1.events.ownGameID, user.game.id);
                 }
             }
             else {
                 user = new user_1.default(socket, this.users.length);
                 this.users.push(user);
+                let game = this.createGame(user);
+                socket.emit(globals_1.events.ownGameID, game.id);
             }
-            socket.on(globals_1.events.disconnected, this.onDisconnected.bind(this, user));
             socket.on(globals_1.events.setUserName, (name) => this.setName(socket, name));
             socket.on(globals_1.events.join, (data) => this.join(data));
-            if (!isNew)
-                return;
-            let game = this.createGame(user);
-            socket.emit(globals_1.events.gameCreated, game.id);
-            socket.broadcast.emit(globals_1.events.playerConnected, {
-                id: socket.id,
-                index: this.users.length - 1,
-            });
         });
     }
-    onDisconnected(user) {
-    }
-    findGameByUser(user) {
-        return this.games.find((game) => user.gameID === game.id && game.active);
-    }
     join(data) {
+        console.log(data);
         const { gameID, userID } = data;
         const game = this.games.find((game) => game.id === gameID);
         const joiner = this.users.find((user) => user.id === userID);
@@ -58,7 +48,7 @@ class UserHandler {
             joiner.socket.emit(globals_1.events.gameNotFound);
             return;
         }
-        if (game.active) {
+        if (game.host && game.guest) {
             return;
         }
         if (!game.active) {
