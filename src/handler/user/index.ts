@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import { events } from "../../globals";
+import Game from "../game";
 
 class User {
   socket: Socket;
@@ -7,7 +8,9 @@ class User {
   id: string;
   name: string;
   side: 'white' | 'black';
-  gameID: string;
+  activeGame: Game;
+  game: Game;
+  opponent: User;
   
   constructor(socket: Socket, index) {
     this.socket = socket;
@@ -21,12 +24,20 @@ class User {
     this.side = side;
   }
 
+  setGame(game: Game) {
+    this.game = game;
+  }
+
   setName(name) {
     this.name = name;
   }
 
-  setGameId(gameId) {
-    this.gameID = gameId;
+  setActiveGame(game: Game) {
+    this.activeGame = game;
+  }
+
+  setOpponent(opponent: User) {
+    this.opponent = opponent;
   }
 
   updateSocket(socket: Socket) {
@@ -36,13 +47,13 @@ class User {
         socket.on(event, callback);
       });
     });
-    this.socket.removeAllListeners();
+    this.socket.disconnect();
+    delete this.socket;
     this.socket = socket;
   }
 
   removeListeners(names: events[]) {
     names.forEach((event) => {
-      console.log('removing listener', event)
       this.socket.removeAllListeners(event);
     });
   }

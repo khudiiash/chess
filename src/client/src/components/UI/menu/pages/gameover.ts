@@ -8,7 +8,6 @@ import { Side } from "@/types";
 export class GameOverPage extends Page {
 
   createObservers(): void {
-    super.createObservers();
     this.observer.on(events.checkmate, this.setResult);
   }
 
@@ -27,15 +26,16 @@ export class GameOverPage extends Page {
 
   setResult(data: { winner: Side }) {
     const { winner } = data;
-    console.log(winner)
     const result = this.dom.querySelector('.result');
     result.textContent = winner === game.model.sides.user ? 'You win' : 'You lose';
   }
 
-
-  
   restart() {
-    this.observer.emit(events.restart);
+    if (game.online) {
+      this.observer.emit(events.restartRequest);
+    } else {
+      this.observer.emit(events.restart);
+    }
   }
 
 }

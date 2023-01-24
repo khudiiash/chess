@@ -8,7 +8,7 @@ export function button(text: string, callback: () => void, classes: string[] = [
   classes.forEach(c => button.classList.add(c));
   button.innerHTML = text;
   button.addEventListener("click", () => {
-    gsap.to(button, { scale: 0.95, duration: 0.05, ease: "power2.in", repeat: 1, yoyo: true });
+    gsap.to(button, { scale: 0.98, duration: 0.1, repeat: 1, yoyo: true });
     callback();
   });
 

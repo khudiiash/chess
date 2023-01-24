@@ -5,7 +5,8 @@ class GameModel implements IModel {
 
   moves: { [key: string]: any } = {};
   name: string = 'Unknown Player';
-  id: string;
+  ownGameID: string;
+  activeGameID: string;
   mode: Mode;
   sides: {
     user: Side,
@@ -55,8 +56,12 @@ class GameModel implements IModel {
     localStorage.setItem('settings', JSON.stringify(this.settings));
   }
 
-  setGameID(id: string) {
-    this.id = id;
+  setOwnGameID(id: string) {
+    this.ownGameID = id;
+  }
+
+  setActiveGameID(id: string) {
+    this.activeGameID = id;
   }
 
   setMode(mode: Mode) {

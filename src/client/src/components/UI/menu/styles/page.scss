@@ -40,9 +40,10 @@ $button-bg-passive: rgba(255, 255, 255, 0.15);
   }
 
   .input.code {
-      color:rgba(255, 255, 255, 0.85);
+      color:rgba(255, 255, 255, 0.65);
+      font-size: 9px;
       &::placeholder {
-        color:rgba(255, 255, 255, 0.4);
+        color:rgba(255, 255, 255, 0.35);
       }
   }
   
@@ -63,13 +64,13 @@ $button-bg-passive: rgba(255, 255, 255, 0.15);
     border: none;
     color: $text-color;
   
-    &.offline  {
+    &.disabled  {
       pointer-events: none;
       background-color: $button-bg-passive;
       color: $text-color-passive;
     }
     
-    &.online {
+    &.enabled {
       pointer-events: all;
       background-color: $button-bg;
       color: $text-color;

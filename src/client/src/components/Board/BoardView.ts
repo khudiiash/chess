@@ -75,7 +75,7 @@ class BoardView implements IView {
             white.name = 'white-rank';
             white.text = label;
             Object.assign(white, style);
-            white.position.set(i - 3.5 + 0.15, 0.1, -5);
+            white.position.set(i - 3.35, 0.1, -4.9);
             white.rotateX(-Math.PI / 2);
             white.rotateZ(-Math.PI / 2);
             this.labelsContainer.add(white);
@@ -85,7 +85,7 @@ class BoardView implements IView {
             black.name = 'black-rank';
             black.text = label;
             Object.assign(black, style);
-            black.position.set(i - 3.5 + 0.15, 0.1, 5);
+            black.position.set(i - 3.65, 0.1, 4.9);
             black.rotateX(-Math.PI / 2);
             black.rotateZ(Math.PI / 2);
             this.labelsContainer.add(black);
@@ -97,7 +97,7 @@ class BoardView implements IView {
             white.name = 'white-file';
             white.text = label;
             Object.assign(white, style);
-            white.position.set(-5, 0.1, i - 3.5);
+            white.position.set(-4.8, 0.1, i - 3.55);
             white.rotateX(-Math.PI / 2);
             white.rotateZ(-Math.PI / 2);
             this.labelsContainer.add(white);
@@ -107,7 +107,7 @@ class BoardView implements IView {
             black.name = 'black-file';
             black.text = label;
             Object.assign(black, style);
-            black.position.set(5, 0.1, i - 3.5);
+            black.position.set(4.8, 0.1, i - 3.45);
             black.rotateX(-Math.PI / 2);
             black.rotateZ(Math.PI / 2);
             this.labelsContainer.add(black);

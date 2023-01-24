@@ -16,7 +16,7 @@ export class PausePage extends Page {
       text('Pause', ['title']),
       button('Continue', this.close),
       button('Restart', this.restart),
-      button('Settings', () => this.goto('settings')),
+      button('Settings', () => this.goto('settings'), ['settings-button']),
       button('Exit', this.exit),
     ]
   }
@@ -36,6 +36,18 @@ export class PausePage extends Page {
       this.observer.emit(events.restartRequest);
     } else {
       this.observer.emit(events.restart);
+    }
+  }
+
+  show() {
+    super.show();
+    const settingsButton = this.dom.querySelector('.settings-button') as HTMLElement;
+    if (game.online) {
+      settingsButton.classList.add('disabled');
+      settingsButton.classList.remove('enabled');
+    } else {
+      settingsButton.classList.remove('disabled');
+      settingsButton.classList.add('enabled');
     }
   }
 

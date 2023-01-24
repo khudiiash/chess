@@ -50,10 +50,10 @@ export class Scene {
     this._stats = new Stats();
     this.userSide= 'white';
 
-
+    // list of functions that will be called on each frame
     this.updateList = [];
 
-    document.body.appendChild( this._stats.dom );
+    // document.body.appendChild( this._stats.dom );
     this._stats.dom.style.position = 'fixed';
     this._stats.dom.style.top = '90vh';
     this._stats.dom.style.left = '0';
@@ -85,7 +85,6 @@ export class Scene {
 
     this.setUserSide('white');
     this._render();
-    // gsap.to(this._camera.position, { duration: 2, delay: 3, z: 0, x: -15, y: 10, ease: 'power2.out' });
   }
 
   public startRendering() {

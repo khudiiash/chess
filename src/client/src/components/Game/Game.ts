@@ -47,7 +47,7 @@ class Game {
       [events.guestJoined]:           this.onGuestJoined,
       [events.setUserName]:           this.setUserName,
       [events.setUserSide]:           this.setUserSide,
-      [events.gameID]:                this.setGameID,
+      [events.gameID]:                this.setOwnGameID,
       [events.mode]:                  this.setMode,
       [events.exit]:                  this.exit,
       [events.difficulty]:            this.setDifficulty,
@@ -98,13 +98,14 @@ class Game {
 
   exit() {
     this.setPlaying(false);
+    this.setActiveGameID('');
     this.clearLocalStorage();
   }
 
 
   onJoinGame(data: any) {
     const userID = localStorage.getItem('userID');
-    this.setGameID(data.gameID);
+    this.setActiveGameID(data.gameID);
     this.setMode('online');
     this.network.on(events.move, this.board.onNetworkMove);
     this.setUserSide(data.host.id === userID ? data.host.side : data.guest.side);
@@ -119,8 +120,12 @@ class Game {
     this.setMode('online');
   }
 
-  setGameID(id: string) {
-    this.model.setGameID(id);
+  setOwnGameID(id: string) {
+    this.model.setOwnGameID(id);
+  }
+
+  setActiveGameID(id: string) {
+    this.model.setActiveGameID(id);
   }
 
   setMode(mode: Mode) {
@@ -160,8 +165,12 @@ class Game {
     return this.model.name;
   }
 
-  get id(): string {
-    return this.model.id;
+  get ownGameID(): string {
+    return this.model.ownGameID;
+  }
+
+  get activeGameID(): string {
+    return this.model.activeGameID;
   }
 
   get mode() : Mode {

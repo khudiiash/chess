@@ -9,33 +9,35 @@ class Game {
   id: string;
   host: User;
   guest: User;
-  moves: Move[] = [];
-  active
+  active: boolean = false;
 
   constructor(host: User) {
     this.id = uuidv4().toUpperCase();
     this.host = host;
-    this.host.setGameId(this.id);
+    this.host.setGame(this);
   }
 
   addPlayer(guest: User) {
     if (this.guest) return;
     this.active = true;
     this.guest = guest;
-    this.guest.setGameId(this.id);
+
+    this.guest.setActiveGame(this);
+    this.host.setActiveGame(this);
+
+    this.guest.setOpponent(this.host);
+    this.host.setOpponent(this.guest);
+
     this.setEvents();
     this.guest.socket.emit(events.joinedGame, this.joinData);
     this.host.socket.emit(events.guestJoined, this.joinData);
   }
 
   setEvents() {
-    this.host.removeListeners(this.events);
-    this.guest.removeListeners(this.events);
-    
     this.players.forEach(player => {
       const opponent = this.players.find(p => p !== player);
-      player.socket.on(events.move,           data => opponent.socket.emit(events.move, data));
-      player.socket.on(events.leave,          () => opponent.socket.emit(events.opponentLeft));
+      player.socket.on(events.move,           (data) => this.move(opponent, data));
+      player.socket.on(events.leave,          () =>     this.leave(player, opponent));
       player.socket.on(events.restartRequest, () => opponent.socket.emit(events.restartRequested));
       player.socket.on(events.restartAccept,  () => opponent.socket.emit(events.restartAccepted));
       player.socket.on(events.restartRefuse,  () => opponent.socket.emit(events.restartRefused));
@@ -56,6 +58,23 @@ class Game {
 
   get players(): User[] {
     return [this.host, this.guest];
+  }
+
+  move(opponent: User, data: any) {
+    console.log('move', data)
+    opponent.socket.emit(events.move, data);
+  }
+  
+  leave(player: User, opponent: User) {
+    this.active = false;
+    this.host.removeListeners(this.events);
+    this.guest.removeListeners(this.events);
+
+    player.setActiveGame(null);
+    opponent.setActiveGame(null);
+    opponent.socket.emit(events.opponentLeft);
+    this.guest = null;
+    this.active = false;
   }
 }
 

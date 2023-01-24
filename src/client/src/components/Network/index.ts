@@ -62,7 +62,8 @@ export class Network {
       });
 
       [
-        events.gameCreated, 
+        events.ownGameID, 
+        events.activeGameID,
         events.joinedGame, 
         events.guestJoined, 
         events.restartRequested, 
@@ -84,6 +85,7 @@ export class Network {
     }
 
     public on(event: string, callback: Function) {
+        this.socket.removeAllListeners(event);
         this.socket.on(event, callback);
     }
 

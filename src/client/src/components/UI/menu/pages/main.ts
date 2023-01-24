@@ -38,15 +38,15 @@ export class MainPage extends Page {
     if (!this.isOnline) return;
     this.isOnline = false;
     document.querySelectorAll('.online').forEach(el => {
-      el.classList.remove('online'); 
-      el.classList.add('offline')
+      el.classList.remove('enabled'); 
+      el.classList.add('disabled')
     });
   }
 
   onConnected() {
-    document.querySelectorAll('.offline').forEach(el => {
-      el.classList.remove('offline'); 
-      el.classList.add('online')
+    document.querySelectorAll('.disabled').forEach(el => {
+      el.classList.remove('disabled'); 
+      el.classList.add('enabled')
     });
     this.isOnline = true;
   }

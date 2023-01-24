@@ -18,7 +18,8 @@ export enum events {
   guestLeft = 'guest left',
   joinedGame = 'joined game',
   guestJoined = 'guest joined',
-  gameCreated = 'game created',
+  ownGameID = 'own game id',
+  activeGameID = 'active game id',
   gameNotFound = 'game not found',
 
   // socket (server)

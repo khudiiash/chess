@@ -16,7 +16,7 @@ export class InvitePage extends Page {
 
     createObservers(): void {
       this.observer.on(events.guestJoined, () => this.startGameWithMode('online'));
-      this.observer.on(events.gameCreated, this.setGameId);
+      this.observer.on(events.ownGameID, this.setGameId);
     }
 
     get name() {
@@ -26,7 +26,7 @@ export class InvitePage extends Page {
     get structure() {
       return [
         text('Share this code with your friend.\nGame will start when your friend enters the code.'),
-        button(game.id, this.copyCode.bind(this), ['code']),
+        button(game.model.ownGameID, this.copyCode.bind(this), ['code']),
       ]
     }
 

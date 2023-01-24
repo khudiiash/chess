@@ -90,6 +90,7 @@ class Info {
 
   onMove(moveData: { move: any; capture: any; piece: any; side: any; }) {
     const { move, capture, piece, side } = moveData;
+    if (!piece) return;
     const message = `${piece.type} ${move.from}→${move.to} ${capture ? `⊗ ${capture.type}` : ''}`;
     this.showMessage(message, side);
   }

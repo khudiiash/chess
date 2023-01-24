@@ -104,6 +104,7 @@ class Board implements IComponent {
     }
 
     restart() {
+        this.cells.forEach(cell => cell.dehighlight());
         this.model.reset();
         this.view.reset();
         this.observer.emit(events.start);
@@ -130,6 +131,8 @@ class Board implements IComponent {
         this.clearSelection();
         const piece = this.model.getPiece(move.from);
         const capture = this.model.getPiece(move.to);
+
+        if (!piece) return;
         this.observer.emit(events.move, { move, piece, capture, side: this.model.state.side });
 
         this.model.makeMove(move);
