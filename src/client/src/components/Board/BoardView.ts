@@ -30,26 +30,38 @@ class BoardView implements IView {
         this.cells = [];
         this.piecesFactory = new PieceFactory();
         this.squares = game.board.model.squares;
-        const geometry = new THREE.BoxGeometry( 8.5, 0.1, 8.5 );
+        const geometry = new THREE.BoxGeometry( 8.1, 0.49, 8.1 );
         const material = new THREE.MeshStandardMaterial( { 
-            color: 0x111111, 
-            roughness: 0.25,
+            color: 0xf0d9b5, 
+            roughness: 0.1,
             transparent: false,
             opacity: 1,
-            depthWrite: true
+            depthWrite: true,
         } );
 
-
         const board = new THREE.Mesh( geometry, material );
+
+
+        const frame_geometry = new THREE.BoxGeometry( 8.5, 0.45, 8.5 );
+        const frame_material = new THREE.MeshPhongMaterial( { 
+            color: new THREE.Color(0x242b33).convertSRGBToLinear(), 
+            transparent: false,
+            opacity: 1,
+            depthWrite: true,
+        } );
+
+        const frame = new THREE.Mesh( frame_geometry, frame_material );
+
+    board.add(frame);   
         board.receiveShadow = true;
         board.castShadow = true;
         this.cellsContainer = new THREE.Object3D();
         this.piecesContainer = new THREE.Object3D();
-        this.cellsContainer.position.set(-3.5, 0.01, -3.5);
-        this.piecesContainer.position.set(-3.5, 0.01, -3.5);
+        this.cellsContainer.position.set(-3.5, 0.51, -3.5);
+        this.piecesContainer.position.set(-3.5, 0.51, -3.5);
 
-        this.cellsContainer.position.y = 0.1;
-        this.piecesContainer.position.y = 0.1;
+        this.cellsContainer.position.y = 0.26;
+        this.piecesContainer.position.y = 0.26;
         board.add(this.cellsContainer);
         board.add(this.piecesContainer);
         this.mesh = board;
@@ -137,10 +149,10 @@ class BoardView implements IView {
             clipBias: 0.003,
             textureWidth: 1024,
             textureHeight: 1024,
-            color: 0x777777,
+            color: 0x777777
         } );
         mirror.rotateX( - Math.PI / 2 );
-        mirror.position.y = 0.09;
+        mirror.position.y = 0.251;
         this.mesh.add( mirror );
     }
 

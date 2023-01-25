@@ -335,9 +335,9 @@ class Search {
       case Difficulty.easy:
         this.mistake_probability = 0.5; break;
       case Difficulty.medium:
-        this.mistake_probability = 0.3; break;
+        this.mistake_probability = 0.25; break;
       case Difficulty.hard:
-        this.mistake_probability = 0.1; break;
+        this.mistake_probability = 0; break;
       default:
         this.mistake_probability = 0;
     }
@@ -350,8 +350,7 @@ class Search {
     const isMistake = Math.random() < this.mistake_probability;
 
     this.board.generate_moves();
-    const legnth = this.board.get_client_moves().length;
-    console.log(this.board.ply)
+
     for (currentDepth = 1; currentDepth <= this.max_depth; ++currentDepth) {	
       this.negamax(-Infinity, Infinity, currentDepth);
       if (this.stop) {

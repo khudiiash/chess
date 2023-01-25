@@ -21,10 +21,12 @@ class CellView implements IView {
     
     this.defaultColor = config.color;
     const material = new THREE.MeshStandardMaterial({
-      color: config.color,
+      color: new THREE.Color(config.color).convertSRGBToLinear(),
       transparent: true,
-      opacity: 0.7
+      opacity: 0.85
     });
+
+    // material.color = material.color.convertSRGBToLinear()
 
 
     this.mesh = new THREE.Mesh(
@@ -51,12 +53,12 @@ class CellView implements IView {
 
   highlight(color: number) {
     // @ts-ignore
-    this.mesh.material.color.setHex(this.defaultColor & color);
+    this.mesh.material.color = new THREE.Color(this.defaultColor & color).convertSRGBToLinear();
   }
 
   dehighlight() {
     // @ts-ignore
-    this.mesh.material.color.setHex(this.defaultColor);
+    this.mesh.material.color = new THREE.Color(this.defaultColor).convertSRGBToLinear();
   }
 }
 

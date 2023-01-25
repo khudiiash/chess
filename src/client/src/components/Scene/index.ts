@@ -61,7 +61,7 @@ export class Scene {
     this._loadingManager.onLoad = () => onLoad({ models: this.models, textures: this.textures, matcaps: this.matcaps });
     this._scene = new THREE.Scene();
     this._camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.01, 100);
-    this._camera.position.set(0, 15, 15);
+    this._camera.position.set(0, 18, 18);
     this._camera.lookAt(0, 0, 0);
     this._renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this._renderer.setClearColor(this.CLEAR_COLOR, 1);
@@ -88,9 +88,7 @@ export class Scene {
   }
 
   public startRendering() {
-    this.setAllCulled(false);
     this._renderer.render(this._scene, this._camera);
-    this.setAllCulled(true);
     this._render();
   }
 
@@ -100,14 +98,6 @@ export class Scene {
 
   each(callback: (object: THREE.Object3D<Event>) => any) {
     this._scene.traverse(callback);
-  }
-
-  setAllCulled(culled: boolean) {
-    this.each((obj: any) => {
-      if (obj.isMesh) {
-        obj.frustumCulled = culled;
-      }
-    });
   }
 
   private _createSurrounding() {
@@ -144,7 +134,7 @@ export class Scene {
     this._controls = new OrbitControls( this._camera, this._renderer.domElement );
     this._controls.enableDamping = true;
     this._controls.dampingFactor = 0.1;
-    this._controls.maxDistance = 25;
+    this._controls.maxDistance = 30;
     this._controls.minDistance = 5;
     this._controls.autoRotateSpeed = 0.5;
     this._controls.enablePan = false;
@@ -195,7 +185,7 @@ export class Scene {
   private _buildLights() {
 
     // this._renderer.shadowMap.enabled = true;
-    // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this._renderer.physicallyCorrectLights = true;
     this._renderer.outputEncoding = THREE.sRGBEncoding;
     this._renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -205,7 +195,6 @@ export class Scene {
     const pointFolder = lightFolder.addFolder('point')
     const amblientFolder = lightFolder.addFolder('ambient');
     const hemiFolder = lightFolder.addFolder('hemisphere');
-
 
 
     const ambient = new THREE.AmbientLight(0x404040, 10);
@@ -221,7 +210,6 @@ export class Scene {
     hemiFolder.add(hemisphere, 'intensity', 0, 10, 0.1)
 
 
-   
     point.position.set(0, 5, 0);
     
     point.userData.defaultIntensity = point.intensity;

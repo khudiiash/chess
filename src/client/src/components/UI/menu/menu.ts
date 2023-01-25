@@ -80,7 +80,6 @@ class Menu {
   }
 
   pause() {
-    console.log('pause')
     this.open('pause');
   }
 

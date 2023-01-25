@@ -28,7 +28,7 @@ class PieceModel {
     this.type = 'base';
     this.value = value;
     this.side = value.charCodeAt(0) < 98 ? 'white' : 'black';
-    this.color = this.side === 'white' ?  0xFFFFF0 : 0x111111;
+    this.color = this.side === 'white' ?  0xffe9ae : 0x363c44;
     
     this.state = {
       // generate random hex id

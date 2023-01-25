@@ -4,6 +4,7 @@ $text-color: rgba(137, 149, 165, 1);
   user-select: none;
   box-sizing: border-box;
   color: $text-color;
+  font-family: 'Roboto', 'Arial';
 }
 
 .header {
@@ -21,6 +22,7 @@ $text-color: rgba(137, 149, 165, 1);
 .side-header {
   width: 200px;
   height: 40px;
+  max-width: 30vw;
   .message {
     width: 100%;
     top: 15px;
@@ -31,15 +33,12 @@ $text-color: rgba(137, 149, 165, 1);
 }
 
 .message {
-  position: absolute;
-  top: 54px;
-  width: 110px;
-  margin: 0 auto;
+  margin: 0 2%;
   height: fit-content;
-  font-size: 10px;
-  letter-spacing: 3px;
+  width: 150px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
   text-align: center;
-  margin-left: calc(50% - 55px);
   text-transform: uppercase;
   text-align: center;
   user-select: none;
@@ -48,14 +47,17 @@ $text-color: rgba(137, 149, 165, 1);
 
 
 
-.white-header {
-  left: calc(50vw - 200px - 75px);
-  border-radius: 0 0 0 15px;
-}
-
-.black-header {
-  border-radius: 0 0 15px 0;
-  left: calc(50vw + 75px);
+.sides-header {
+  width: 500px;
+  max-width: 90vw;
+  position: fixed;
+  left: 50vw;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transform: translateX(-50%);
+  border-radius: 0 0 15px 15px;
 }
 
 

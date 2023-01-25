@@ -35,7 +35,6 @@ class Observer {
 
   public emit(event: string, data?: any) {
     if (!this._observers[event]) return console.warn(`Event ${event} has no observers`);
-    console.log(`%c[observer]: ${event}`, 'color: #00ff00');
     this._observers[event].forEach((observer) => observer(data));
   }
 

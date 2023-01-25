@@ -47,17 +47,17 @@ class PieceView {
 
     this.colors = {
       default: color,
-      active: 0x2222ff,
+      active: 0x6666ff,
       checked: 0xff0000
     }
 
     this.mesh.material = new THREE.MeshPhongMaterial({ 
-      color: this.colors.default,
+      color: new THREE.Color(this.colors.default).convertSRGBToLinear(),
       transparent: true, 
       aoMap: map,
       aoMapIntensity: 2.5,
       map: map,
-      shininess: 0,
+      shininess: 0.5,
     });
     // @ts-ignore
     this.mesh.userData.defaultEmissiveIntensity = this.mesh.material.emissiveIntensity;
@@ -82,12 +82,12 @@ class PieceView {
 
   highlight() {
     // @ts-ignore
-    this.mesh.material.color.setHex(this.colors.active);
+    this.mesh.material.color = new THREE.Color(this.colors.active).convertSRGBToLinear();
   }
   
   dehighlight() {
     // @ts-ignore
-    this.mesh.material.color.setHex(this.colors.default);
+    this.mesh.material.color = new THREE.Color(this.colors.default).convertSRGBToLinear();
   }
 
   kill(instantly = false) {

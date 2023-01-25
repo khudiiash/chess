@@ -52,20 +52,17 @@ class Info {
 
   
   build() {
-   const whiteHeader = document.createElement('div');
-   whiteHeader.classList.add('white-header', 'header', 'side-header');
    this.whiteMessage = document.createElement('div');
    this.whiteMessage.classList.add('white-message', 'message');
-   whiteHeader.appendChild(this.whiteMessage);
 
-   const blackHeader = document.createElement('div');
-   blackHeader.classList.add('black-header', 'header', 'side-header');
    this.blackMessage = document.createElement('div');
    this.blackMessage.classList.add('black-message', 'message');
-   blackHeader.appendChild(this.blackMessage);
-    
-   this.dom.appendChild(whiteHeader);
-   this.dom.appendChild(blackHeader);
+
+   const sidesHeader = document.createElement('div');
+    sidesHeader.classList.add('sides-header', 'header');
+    sidesHeader.appendChild(this.whiteMessage);
+    sidesHeader.appendChild(this.blackMessage);
+    this.dom.appendChild(sidesHeader);
 
    const turnContainer = document.createElement('div');
    turnContainer.classList.add('turn-container', 'header');

@@ -33,7 +33,6 @@ export class SettingsPage extends Page {
 
     restoreSettings() {
       const settings = localStorage.getItem('settings');
-      console.log('restore settings')
       if (!settings) return;
       const { name, side } = JSON.parse(settings);
 
