@@ -30,7 +30,7 @@ class BoardView implements IView {
         this.cells = [];
         this.piecesFactory = new PieceFactory();
         this.squares = game.board.model.squares;
-        const geometry = new THREE.BoxGeometry( 8.1, 0.49, 8.1 );
+        const geometry = new THREE.BoxGeometry( 8.1, 0.48, 8.1 );
         const material = new THREE.MeshStandardMaterial( { 
             color: 0xf0d9b5, 
             roughness: 0.1,
@@ -60,8 +60,8 @@ class BoardView implements IView {
         this.cellsContainer.position.set(-3.5, 0.51, -3.5);
         this.piecesContainer.position.set(-3.5, 0.51, -3.5);
 
-        this.cellsContainer.position.y = 0.26;
-        this.piecesContainer.position.y = 0.26;
+        this.cellsContainer.position.y = 0.275;
+        this.piecesContainer.position.y = 0.275;
         board.add(this.cellsContainer);
         board.add(this.piecesContainer);
         this.mesh = board;
@@ -152,7 +152,7 @@ class BoardView implements IView {
             color: 0x777777
         } );
         mirror.rotateX( - Math.PI / 2 );
-        mirror.position.y = 0.251;
+        mirror.position.y = 0.25;
         this.mesh.add( mirror );
     }
 

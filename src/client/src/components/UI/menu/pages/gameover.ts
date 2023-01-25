@@ -3,6 +3,7 @@ import { button, text } from "../elements";
 import { events } from "@/../../globals";
 import {boundClass} from 'autobind-decorator'
 import { Side } from "@/types";
+import { E } from "@/components/Engine/constants";
 
 @boundClass
 export class GameOverPage extends Page {
@@ -27,7 +28,11 @@ export class GameOverPage extends Page {
   setResult(data: { winner: Side }) {
     const { winner } = data;
     const result = this.dom.querySelector('.result');
-    result.textContent = winner === game.model.sides.user ? 'You win' : 'You lose';
+    if (game.local) {
+      result.textContent = `${winner} wins`;
+    } else {
+      result.textContent = winner === game.model.sides.user ? 'You win' : 'You lose';
+    }
   }
 
   restart() {

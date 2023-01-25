@@ -37,6 +37,7 @@ export class Scene {
   mixers: any[];
   clock: THREE.Clock;
   updateList: Function[];
+  isPortrait: boolean;
 
   build(onLoad: Function) {
     this._loadingManager = new THREE.LoadingManager()
@@ -49,7 +50,8 @@ export class Scene {
     this.gui.hide();
     this._stats = new Stats();
     this.userSide= 'white';
-
+    this.isPortrait = window.innerWidth < window.innerHeight;
+    const camaraPos = this.isPortrait ? 40 : 20;
     // list of functions that will be called on each frame
     this.updateList = [];
 
@@ -61,7 +63,7 @@ export class Scene {
     this._loadingManager.onLoad = () => onLoad({ models: this.models, textures: this.textures, matcaps: this.matcaps });
     this._scene = new THREE.Scene();
     this._camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.01, 100);
-    this._camera.position.set(0, 18, 18);
+    this._camera.position.set(0, camaraPos, camaraPos);
     this._camera.lookAt(0, 0, 0);
     this._renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this._renderer.setClearColor(this.CLEAR_COLOR, 1);
@@ -101,7 +103,7 @@ export class Scene {
   }
 
   private _createSurrounding() {
-    const fog = new THREE.Fog(this.CLEAR_COLOR, 30, 40);
+    const fog = new THREE.Fog(this.CLEAR_COLOR, 50, 60);
     this._scene.fog = fog;
     
     const plane = new THREE.Mesh(
@@ -134,7 +136,7 @@ export class Scene {
     this._controls = new OrbitControls( this._camera, this._renderer.domElement );
     this._controls.enableDamping = true;
     this._controls.dampingFactor = 0.1;
-    this._controls.maxDistance = 30;
+    this._controls.maxDistance = 40;
     this._controls.minDistance = 5;
     this._controls.autoRotateSpeed = 0.5;
     this._controls.enablePan = false;

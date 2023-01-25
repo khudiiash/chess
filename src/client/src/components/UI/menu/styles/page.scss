@@ -13,6 +13,10 @@ $button-bg-passive: rgba(255, 255, 255, 0.15);
   position: absolute;
   pointer-events: auto;
 
+  * {
+    user-select: none;
+  }
+
   .text {
     font-size: 10px;
     letter-spacing: 2px;
