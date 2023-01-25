@@ -134,7 +134,7 @@ class Board implements IComponent {
 
         if (!piece) return;
         this.observer.emit(events.move, { move, piece, capture, side: this.model.state.side });
-
+       
         this.model.makeMove(move);
         const moving = piece.move(move);
 

@@ -19,6 +19,7 @@ class PieceView {
   colors: { default: number; active: number; checked: number };
   height: number;
   char: string;
+  moveSound: HTMLAudioElement;
 
   constructor({ resources }: IPieceConstructorParams) {
     this.resources = resources;
@@ -36,7 +37,7 @@ class PieceView {
     this.defaultRotation = this.mesh.rotation.clone();
     const mat = this.resources.textures.white_marble;
     this.height = this.mesh.geometry.boundingBox.max.y - this.mesh.geometry.boundingBox.min.y;
-
+    this.moveSound = new Audio(`/audio/chess-sound.mp3`);
     const rotation = Math.random() * Math.PI * 2;
     const map = mat.diffuse.clone();
     map.encoding = THREE.sRGBEncoding;
@@ -76,7 +77,10 @@ class PieceView {
   async move(square: string) {
     const { row, col } = Cell.fromSquare(square);
     return new Promise(resolve => {
-      gsap.to(this.mesh.position, {x: row, z: col, onComplete: resolve});
+      gsap.to(this.mesh.position, {x: row, z: col, onComplete: () => {
+        this.moveSound.play();
+        resolve(true);
+      }});
     })
   }
 

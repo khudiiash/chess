@@ -37,6 +37,22 @@ module.exports = {
         ]
       },
 
+      // Local audio files
+      {
+        test: /\.(mp3|wav|ogg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'audio',
+              publicPath: 'audio'
+            }
+          }
+        ]
+      },
+        
+
       // Shaders
       {
         test: /\.glsl$/,
