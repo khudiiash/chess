@@ -110,7 +110,9 @@ class Info {
 
   switchTurn(turn: Side) {
     const turnFrame = document.querySelector('.turn-frame');
-    gsap.to(turnFrame, { duration: 0.25, x: turn === 'white' ? 0 : 60 });
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    const x = isPortrait ? 50 : 60;
+    gsap.to(turnFrame, { duration: 0.25, x: turn === 'white' ? 0 : x });
     this.showMessage(`${turn} Turn`, 'turn');
   }
 

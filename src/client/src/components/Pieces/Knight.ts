@@ -31,10 +31,12 @@ class KnightView extends PieceView {
   
     build(config: any) {
       super.build(config);
+      this.sounds.move = new Audio('/audio/knight-move.mp3');
     }
 
     async move(square: string) {
       const { row, col } = Cell.fromSquare(square);
+      this.sounds.move.play();
       return new Promise(resolve => {
         gsap.timeline()
           .to(this.mesh.position, { y: 1.2, duration: 0.3})

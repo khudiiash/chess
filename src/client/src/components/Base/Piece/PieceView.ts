@@ -19,7 +19,7 @@ class PieceView {
   colors: { default: number; active: number; checked: number };
   height: number;
   char: string;
-  moveSound: HTMLAudioElement;
+  sounds: { move: HTMLAudioElement; capture: HTMLAudioElement; };
 
   constructor({ resources }: IPieceConstructorParams) {
     this.resources = resources;
@@ -37,7 +37,11 @@ class PieceView {
     this.defaultRotation = this.mesh.rotation.clone();
     const mat = this.resources.textures.white_marble;
     this.height = this.mesh.geometry.boundingBox.max.y - this.mesh.geometry.boundingBox.min.y;
-    this.moveSound = new Audio(`/audio/chess-sound.mp3`);
+
+    this.sounds = {
+      move: new Audio(`/audio/move.mp3`),
+      capture: new Audio(`/audio/capture.mp3`),
+    }
     const rotation = Math.random() * Math.PI * 2;
     const map = mat.diffuse.clone();
     map.encoding = THREE.sRGBEncoding;
@@ -76,11 +80,9 @@ class PieceView {
 
   async move(square: string) {
     const { row, col } = Cell.fromSquare(square);
+    this.sounds.move.play();
     return new Promise(resolve => {
-      gsap.to(this.mesh.position, {x: row, z: col, onComplete: () => {
-        this.moveSound.play();
-        resolve(true);
-      }});
+      gsap.to(this.mesh.position, {x: row, z: col, duration: this.sounds.move.duration, onComplete: resolve });
     })
   }
 
@@ -98,7 +100,7 @@ class PieceView {
     this.isDead = true;
     this.parent = this.mesh.parent;
     this.mesh.userData.clickable = false;
-    
+    this.sounds.capture.play();
     const deathObject = this.side === 'white' ? game.weights.view.whites : game.weights.view.blacks;
     const deathWP = deathObject.getWorldPosition(new THREE.Vector3());
     const meshWP = this.mesh.getWorldPosition(new THREE.Vector3());

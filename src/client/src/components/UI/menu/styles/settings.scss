@@ -53,3 +53,17 @@
 
 
 }
+
+@media screen and (max-height: 600px) {
+  .settings .horizontal {
+    margin: 5px 0;
+  }
+
+  .settings {
+
+    .input, .button, .text {
+      margin: 5px;
+    }
+  }
+  
+}
